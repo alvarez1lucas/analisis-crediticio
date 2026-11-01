@@ -1,4 +1,7 @@
+from datetime import datetime
+
 import openpyxl
+import pandas as pd
 import pytest
 
 from empresas import plantilla as p
@@ -8,15 +11,26 @@ EJEMPLO = {"ventas": 1000, "costo": 600, "comercial": 50, "admin": 40, "explor":
            "asociadas": 10, "ing_fin": 20, "gasto_int": 50, "otros_fin": -10, "impuesto": 60, "neto_inf": 210,
            "caja": 100, "inv_cp": 50, "creditos": 150, "inventarios": 80, "otros_ac": 20, "ppe": 1200, "intang": 100, "inv_asoc": 150, "otros_anc": 50,
            "activo_inf": 1900, "deuda_cp": 100, "arr_cp": 10, "proveedores": 120, "otros_pc": 70, "deuda_lp": 500, "arr_lp": 40, "otros_pnc": 160,
-           "patrimonio": 900, "cfo": 350, "capex": 200, "int_pag": 45, "dividendos": 30}
+           "patrimonio": 900, "cfo": 350, "capex": 200, "int_pag": 45, "dividendos": 30,
+           "d_on": 500, "d_bancos": 60, "d_prefin": 30, "d_otra": 10, "m_dolar": 550, "m_linked": 20, "m_pesos": 30, "m_otra": 0,
+           "v_1": 100, "v_2": 150, "v_3": 200, "v_mas": 150, "tasa_fija": 480}
+MERCADO = pd.DataFrame({"fecha": ["2024-01-02", "2024-01-03"], "riesgo_pais": [1900, 800], "ust_1": [4.0, 4.1], "ust_2": [4.2, 4.3], "ust_3": [4.3, 4.4],
+                        "ust_5": [4.5, 4.6], "ust_7": [4.7, 4.8], "ust_10": [4.9, 5.0], "badlar": [100, 101], "adelantos": [110, 111]})
 
 
 @pytest.fixture(scope="module")
 def calculado(tmp_path_factory):
     base = tmp_path_factory.mktemp("xl")
     vacio = base / "vacio.xlsx"
-    p.construir(vacio, {})
+    p.construir(vacio, {}, MERCADO)
     wb = openpyxl.load_workbook(vacio)
+    e = wb["Emisiones"]
+    fila = dict(A="Pampa", B="Clase X", C=datetime(2024, 1, 3), D=datetime(2030, 1, 3), E="Dólar duro", F="Nueva York", G=100, H=0.08, I=0.085)
+    for col, valor in fila.items():
+        e[f"{col}5"] = valor
+    fila.update(E="Pesos tasa variable", C=datetime(2024, 1, 2))
+    for col, valor in fila.items():
+        e[f"{col}6"] = valor
     ws = wb["Pampa"]
     assert set(EJEMPLO) == set(p.CARGA)
     for col in p.COLUMNAS:
@@ -62,9 +76,32 @@ def test_el_primer_anio_no_inventa_datos_del_anterior(calculado):
         assert wb["Ratios"][bloque(indice(ratio), "B")].value == "n.d."
 
 
+def test_emision_en_dolares_toma_tesoro_y_riesgo_pais_del_dia(calculado):
+    v, _ = calculado
+    assert v[("EMISIONES", "L5")] == pytest.approx(6.0, abs=0.01)
+    assert v[("EMISIONES", "M5")] == 800
+    assert v[("EMISIONES", "N5")] == 4.6  # plazo inmediato inferior: 5 años
+    assert v[("EMISIONES", "O5")] == pytest.approx(390)
+    assert v[("EMISIONES", "P5")] == pytest.approx(-410)
+    assert v[("EMISIONES", "Q5")] == 2024
+
+
+def test_emision_en_pesos_no_calcula_spread_contra_el_tesoro(calculado):
+    v, _ = calculado
+    assert v[("EMISIONES", "O6")] == "n.a."
+    assert v[("EMISIONES", "P6")] == "n.a."
+
+
+def test_composicion_entra_en_el_control_y_en_los_ratios(calculado):
+    v, _ = calculado
+    assert v[("RATIOS", bloque(indice("ON / deuda financiera"), "F"))] == pytest.approx(500 / 600)
+    assert v[("RATIOS", bloque(indice("Caja / vencimientos a 1 año"), "F"))] == pytest.approx(150 / 100)
+    assert v[("RATIOS", bloque(indice("Costo medio de la deuda"), "F"))] == pytest.approx(50 / 650)
+
+
 def test_un_descuadre_se_marca(tmp_path):
     vacio = tmp_path / "v.xlsx"
-    p.construir(vacio, {})
+    p.construir(vacio, {}, MERCADO)
     wb = openpyxl.load_workbook(vacio)
     ws = wb["YPF"]
     for clave, valor in EJEMPLO.items():

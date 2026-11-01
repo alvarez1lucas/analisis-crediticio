@@ -14,10 +14,16 @@ from pathlib import Path
 
 import formulas
 import numpy as np
+import pandas as pd
 import xlsxwriter
 
 ROOT = Path(__file__).resolve().parents[2]
 ARCHIVO = ROOT / "excel" / "analisis_crediticio.xlsx"
+MERCADO = ROOT / "data" / "mercado.csv"
+PLAZOS_TESORO = [1, 2, 3, 5, 7, 10]
+INSTRUMENTOS = ["Dólar duro", "Dólar linked", "Pesos tasa variable", "Pesos tasa fija", "UVA"]
+LEYES = ["Nueva York", "Argentina"]
+FILAS_EMISIONES = 150
 EMPRESAS = ["Pampa", "YPF", "Vista"]
 ANIOS = [2021, 2022, 2023, 2024, 2025]
 COLUMNAS = "BCDEF"
@@ -74,6 +80,20 @@ LINEAS = [
     ("patrimonio", "Patrimonio", None, "Incluye participación minoritaria"),
     ("deuda", "Deuda total", "{deuda_cp}+{arr_cp}+{deuda_lp}+{arr_lp}", "Incluye arrendamientos"),
     ("deuda_neta", "Deuda neta", "{deuda}-{caja}-{inv_cp}", None),
+    (None, "Composición de la deuda financiera", None, None),
+    ("d_on", "Obligaciones negociables", None, "Sin arrendamientos, como todo este bloque"),
+    ("d_bancos", "Préstamos bancarios", None, None),
+    ("d_prefin", "Prefinanciación de exportaciones", None, None),
+    ("d_otra", "Otra deuda financiera", None, None),
+    ("m_dolar", "En dólares", None, "Total por moneda"),
+    ("m_linked", "Dólar linked", None, None),
+    ("m_pesos", "En pesos", None, "Incluye UVA"),
+    ("m_otra", "Otras monedas", None, None),
+    ("v_1", "Vence en 1 año", None, "Total por vencimiento"),
+    ("v_2", "Vence en 2 años", None, None),
+    ("v_3", "Vence en 3 años", None, None),
+    ("v_mas", "Vence en más de 3 años", None, None),
+    ("tasa_fija", "Deuda a tasa fija", None, None),
     (None, "Flujo de fondos", None, None),
     ("cfo", "Flujo operativo antes de intereses", None, "Si el 20-F ya restó los intereses pagados, volvé a sumarlos"),
     ("capex", "Inversiones en activos fijos", None, "Positivo"),
@@ -84,7 +104,10 @@ LINEAS = [
     ("dif_balance", "Activo - pasivo - patrimonio", "{activo}-{pasivo}-{patrimonio}", None),
     ("dif_activo", "Activo calculado - informado", "{activo}-{activo_inf}", None),
     ("dif_neto", "Resultado calculado - informado", "{neto}-{neto_inf}", None),
-    ("estado", "Estado", 'IF({ventas}=0,"Sin cargar",IF(AND(ABS({dif_balance})<=$B$4,ABS({dif_activo})<=$B$4,ABS({dif_neto})<=$B$4),"OK","Revisar"))', None),
+    ("dif_tipo", "Deuda por tipo - balance", "SUM({d_on}:{d_otra})-{deuda_cp}-{deuda_lp}", None),
+    ("dif_moneda", "Deuda por moneda - balance", "SUM({m_dolar}:{m_otra})-{deuda_cp}-{deuda_lp}", None),
+    ("dif_vto", "Deuda por vencimiento - balance", "SUM({v_1}:{v_mas})-{deuda_cp}-{deuda_lp}", "Puede diferir si el 20-F abre vencimientos contractuales con intereses: anotalo en Fuente"),
+    ("estado", "Estado", 'IF({ventas}=0,"Sin cargar",IF(AND(ABS({dif_balance})<=$B$4,ABS({dif_activo})<=$B$4,ABS({dif_neto})<=$B$4,ABS({dif_tipo})<=$B$4,ABS({dif_moneda})<=$B$4,ABS({dif_vto})<=$B$4),"OK","Revisar"))', None),
 ]
 FILAS = {clave: FILA_INICIO + i for i, (clave, *_) in enumerate(LINEAS) if clave}
 CARGA = [clave for clave, _, formula, _ in LINEAS if clave and formula is None]
@@ -106,6 +129,11 @@ RATIOS = [
     ("Deuda / patrimonio", "{deuda}/{patrimonio}", X, "patrimonio"),
     ("Flujo libre / deuda", "{fcf}/{deuda}", P, "deuda"),
     ("Rentabilidad sobre patrimonio", "{neto}/{patrimonio}", P, "patrimonio"),
+    ("ON / deuda financiera", "{d_on}/({deuda_cp}+{deuda_lp})", P, "deuda"),
+    ("Deuda en dólares / deuda financiera", "{m_dolar}/({deuda_cp}+{deuda_lp})", P, "deuda"),
+    ("Tasa fija / deuda financiera", "{tasa_fija}/({deuda_cp}+{deuda_lp})", P, "deuda"),
+    ("Caja / vencimientos a 1 año", "({caja}+{inv_cp})/{v_1}", X, "v_1"),
+    ("Costo medio de la deuda", "{gasto_int}/(({deuda}+{deuda_ant})/2)", P, "deuda_ant"),
     ("Días de cobro", "{creditos}/{ventas}*365", '0;(0);"-"', "ventas"),
 ]
 FILA_COMPARA = 7
@@ -134,7 +162,7 @@ def formula_ratio(hoja: str, plantilla: str, i: int) -> str | None:
     return None if faltan else f
 
 
-def construir(archivo: Path, valores: dict) -> None:
+def construir(archivo: Path, valores: dict, mercado: pd.DataFrame) -> None:
     wb = xlsxwriter.Workbook(archivo)
     cache: dict = {}
 
@@ -174,12 +202,16 @@ def construir(archivo: Path, valores: dict) -> None:
         ("4. Agrupar", "Cada línea del 20-F va en una sola línea de acá. Lo que no tenga lugar va en la línea Otros que corresponda."),
         ("5. Fuente", "En la fila Fuente anotá el 20-F y la página. Usá el dato más nuevo si un año fue reexpresado."),
         ("6. Control", "Copiá el activo y el resultado neto informados. Un año está cargado cuando su Estado dice OK."),
+        ("7. Emisiones", "En Emisiones cargá una fila por ON o reapertura, desde el aviso de resultados. Las columnas de la derecha se calculan solas."),
     ]), ("Ejemplo de la línea Costo de ventas", [
         ("Dato del 20-F", "Si el informe muestra (1.234,5), cargá 1234,5 en positivo. Es un valor de ejemplo, no un dato de la empresa."),
+        ("Fila de Emisiones", "Empresa, clase, fecha de emisión, vencimiento, instrumento, ley, monto en US$ M, cupón, rendimiento, colocadores y fuente. Si se colocó a la par, el rendimiento es el cupón."),
     ]), ("Definiciones", [
         ("EBITDA", "Resultado operativo sin asociadas + depreciación y amortización + deterioro. No es el EBITDA ajustado que publica cada empresa."),
         ("Deuda", "Deuda financiera corriente y no corriente, con arrendamientos."),
         ("Cobertura de servicio de deuda", "Flujo operativo antes de intereses / (intereses pagados + deuda y arrendamientos corrientes del año anterior)."),
+        ("Spread", "Rendimiento de la emisión menos la tasa del Tesoro de EE.UU. del plazo inmediato inferior, en puntos básicos. Sólo para dólar duro."),
+        ("Prima contra riesgo país", "Spread menos riesgo país de ese día. Negativa: la empresa se financió más barato que el Estado."),
     ])]
     for titulo, filas in bloques:
         g.write(fila, 0, titulo, fmt(bold=True, font_size=12, font_color=ENCABEZADO))
@@ -280,6 +312,59 @@ def construir(archivo: Path, valores: dict) -> None:
     g_ap.set_size({"width": 500, "height": 300})
     r.insert_chart("H6", g_ap)
 
+    # --- Mercado
+    k = nueva_hoja("Mercado", "Series de mercado", "Riesgo país: ArgentinaDatos. Tesoro de EE.UU.: FRED. BADLAR y adelantos a empresas: BCRA. Se actualiza con python -m empresas.mercado.", "#898781")
+    k.set_column("A:A", 12)
+    k.set_column("B:J", 11)
+    k.freeze_panes(4, 1)
+    columnas = ["Fecha", "Riesgo país (pb)"] + PLAZOS_TESORO + ["BADLAR (%)", "Adelantos (%)"]
+    alto_m = fmt(**{**encabezado, "text_wrap": True})
+    k.set_row(3, 30)
+    k.write_row(3, 0, columnas, alto_m)
+    k.write("C3", "Tesoro de EE.UU. por plazo en años (%)", fmt(font_color=GRIS))
+    fecha = fmt(num_format="dd/mm/yyyy", font_color=AZUL)
+    dato = fmt(num_format="0.00", font_color=AZUL)
+    for i, fila_m in enumerate(mercado.itertuples(index=False)):
+        k.write_datetime(4 + i, 0, pd.Timestamp(fila_m.fecha).to_pydatetime(), fecha)
+        k.write_number(4 + i, 1, fila_m.riesgo_pais, fmt(num_format="0", font_color=AZUL))
+        for j, p in enumerate(PLAZOS_TESORO):
+            k.write_number(4 + i, 2 + j, getattr(fila_m, f"ust_{p}"), dato)
+        k.write_number(4 + i, 8, fila_m.badlar, dato)
+        k.write_number(4 + i, 9, fila_m.adelantos, dato)
+    ult = 4 + len(mercado)
+    M_FECHA = f"Mercado!$A$5:$A${ult}"
+
+    # --- Emisiones
+    n = nueva_hoja("Emisiones", "Emisiones de obligaciones negociables", "Una fila por ON o reapertura. Columnas A a K: cargá desde el aviso de resultados. L a Q: se calculan solas.", "#E34948")
+    titulos = ["Empresa", "Clase", "Fecha de emisión", "Vencimiento", "Instrumento", "Ley", "Monto (US$ M)", "Cupón", "Rendimiento", "Colocadores", "Fuente",
+               "Plazo (años)", "Riesgo país (pb)", "Tesoro (%)", "Spread (pb)", "Prima contra riesgo país (pb)", "Año"]
+    n.set_row(3, 42)
+    n.write_row(3, 0, titulos, fmt(**{**encabezado, "text_wrap": True}))
+    n.set_column("A:A", 9)
+    n.set_column("B:B", 10)
+    n.set_column("C:D", 11)
+    n.set_column("E:F", 16)
+    n.set_column("G:I", 11)
+    n.set_column("J:K", 26)
+    n.set_column("L:Q", 11)
+    n.freeze_panes(4, 2)
+    n.autofilter(3, 0, 3 + FILAS_EMISIONES, len(titulos) - 1)
+    ed = dict(font_color=AZUL, bg_color=RESALTE, border=1, border_color=LINEA)
+    formatos = ["", "", "dd/mm/yyyy", "dd/mm/yyyy", "", "", "#,##0.0", "0.00%", "0.00%", "", ""]
+    fin_e = 4 + FILAS_EMISIONES
+    n.data_validation(f"A5:A{fin_e}", {"validate": "list", "source": EMPRESAS})
+    n.data_validation(f"E5:E{fin_e}", {"validate": "list", "source": INSTRUMENTOS})
+    n.data_validation(f"F5:F{fin_e}", {"validate": "list", "source": LEYES})
+    for f in range(5, fin_e + 1):
+        for c, nf in zip("ABCDEFGHIJK", formatos):
+            n.write_blank(f"{c}{f}", None, fmt(**ed, **({"num_format": nf} if nf else {})))
+        formula(n, f"L{f}", f'IF($C{f}="","",($D{f}-$C{f})/365.25)', num_format="0.0")
+        formula(n, f"M{f}", f'IF($C{f}="","",INDEX(Mercado!$B$5:$B${ult},MATCH($C{f},{M_FECHA},1)))', font_color=VERDE, num_format="0")
+        formula(n, f"N{f}", f'IF($C{f}="","",INDEX(Mercado!$C$5:$H${ult},MATCH($C{f},{M_FECHA},1),MATCH(MAX($L{f},1),Mercado!$C$4:$H$4,1)))', font_color=VERDE, num_format="0.00")
+        formula(n, f"O{f}", f'IF($C{f}="","",IF($E{f}="{INSTRUMENTOS[0]}",($I{f}*100-$N{f})*100,"n.a."))', num_format="0")
+        formula(n, f"P{f}", f'IF($C{f}="","",IF($E{f}="{INSTRUMENTOS[0]}",$O{f}-$M{f},"n.a."))', num_format='0;(0);0')
+        formula(n, f"Q{f}", f'IF($C{f}="","",YEAR($C{f}))', num_format="0")
+
     wb.set_properties({"title": "Análisis crediticio de empresas", "author": "Lucas Alvarez"})
     wb.close()
 
@@ -304,9 +389,10 @@ def main() -> None:
     if ARCHIVO.exists() and "--forzar" not in sys.argv:
         raise SystemExit(f"{ARCHIVO.name} ya existe y puede tener datos cargados. Usá --forzar para reemplazarlo.")
     ARCHIVO.parent.mkdir(exist_ok=True)
-    construir(ARCHIVO, {})
+    mercado = pd.read_csv(MERCADO)
+    construir(ARCHIVO, {}, mercado)
     valores = calcular(ARCHIVO)
-    construir(ARCHIVO, valores)
+    construir(ARCHIVO, valores, mercado)
     print(f"{ARCHIVO.name}: {len(valores)} celdas calculadas")
 
 
