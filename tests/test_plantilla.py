@@ -168,6 +168,27 @@ def test_el_rescate_guarda_lo_cargado_a_mano(tmp_path, monkeypatch):
     assert d[("Vista", 2025, "ventas")] == 7
 
 
+def test_emision_se_compara_con_el_credito_del_mes(tmp_path):
+    archivo = tmp_path / "t.xlsx"
+    tasas = pd.DataFrame({"mes": ["2024-01-01"], "doc_usd": [7.0], "doc_usd_corto": [6.0], "doc_usd_largo": [7.5], "doc_ars": [100.0], "pf_usd": [1.0], "pf_ars": [90.0]})
+    p.construir(archivo, {}, MERCADO, tasas=tasas)
+    wb = openpyxl.load_workbook(archivo)
+    for col, valor in dict(A="Vista", C=datetime(2024, 1, 3), D=datetime(2030, 1, 3), E="Dólar duro", H=0.08).items():
+        wb["Emisiones"][f"{col}5"] = valor
+    wb.save(archivo)
+    v = p.calcular(archivo)
+    assert v[("EMISIONES", "R5")] == 7.5
+    assert v[("EMISIONES", "S5")] == pytest.approx(50)
+    assert v[("TASAS", "H5")] == 6
+
+
+def test_las_tasas_no_cruzan_dolares_con_pesos():
+    t = pd.read_csv(p.TASAS_SISTEMA)
+    assert t.mes.iloc[0] == "2020-01-01"
+    assert t.doc_usd.median() < 15 < t.doc_ars.median()
+    assert t.pf_usd.median() < 5 < t.pf_ars.median()
+
+
 def test_un_descuadre_se_marca(tmp_path):
     vacio = tmp_path / "v.xlsx"
     p.construir(vacio, {}, MERCADO)

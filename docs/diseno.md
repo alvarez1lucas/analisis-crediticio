@@ -34,6 +34,7 @@
 - Sólo se comparan instrumentos de igual moneda y plazo parecido.
 - Las tasas del BCRA son del sistema y en pesos: dan contexto, no el costo de estas empresas.
 - El detalle de tasas de préstamos bancarios depende de lo que informe cada 20-F.
-- La API del BCRA no trae tasas de crédito en dólares: esa comparación depende de los 20-F.
+- Las tasas de crédito del sistema son de empresas que no son pymes, a tasa fija o repactable: es una referencia, no el costo de estas empresas.
+- No usar las series de datos.gob.ar de "empresas de primera línea": el BCRA las discontinuó en julio de 2009, y la versión publicada hasta 2026 tiene valores que no corresponden a su moneda.
 - Sólo se conoce el saldo de crédito al cierre de cada año, no cada préstamo tomado durante el año.
 - Sólo se ven las emisiones hechas: no se observan las que una empresa decidió no hacer.

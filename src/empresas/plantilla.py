@@ -23,6 +23,7 @@ MERCADO = ROOT / "data" / "mercado.csv"
 BALANCES = ROOT / "data" / "balances.csv"
 EMISIONES = ROOT / "data" / "emisiones.csv"
 CREDITOS = ROOT / "data" / "creditos.csv"
+TASAS_SISTEMA = ROOT / "data" / "tasas.csv"
 CARGA_MANUAL = ["Pampa"]
 PLAZOS_TESORO = [1, 2, 3, 5, 7, 10]
 INSTRUMENTOS = ["Dólar duro", "Dólar linked", "Pesos tasa variable", "Pesos tasa fija", "UVA"]
@@ -181,8 +182,9 @@ def formula_ratio(hoja: str, plantilla: str, i: int) -> str | None:
     return None if faltan else f
 
 
-def construir(archivo: Path, valores: dict, mercado: pd.DataFrame, balances: dict | None = None, emisiones: pd.DataFrame | None = None, creditos: pd.DataFrame | None = None) -> None:
+def construir(archivo: Path, valores: dict, mercado: pd.DataFrame, balances: dict | None = None, emisiones: pd.DataFrame | None = None, creditos: pd.DataFrame | None = None, tasas: pd.DataFrame | None = None) -> None:
     balances = balances or {}
+    tasas = pd.DataFrame(columns=["mes", "doc_usd", "doc_usd_corto", "doc_usd_largo", "doc_ars", "pf_usd", "pf_ars"]) if tasas is None else tasas
     wb = xlsxwriter.Workbook(archivo)
     cache: dict = {}
 
@@ -242,6 +244,7 @@ def construir(archivo: Path, valores: dict, mercado: pd.DataFrame, balances: dic
         ("Altman Z'' EM", "Versión para mercados emergentes: 3,25 + 6,56 capital de trabajo/activo + 3,26 resultados acumulados/activo + 6,72 resultado operativo/activo + 1,05 patrimonio/pasivo. Es una referencia, no un rating."),
         ("Spread", "Rendimiento de la emisión menos la tasa del Tesoro de EE.UU. del plazo inmediato inferior, en puntos básicos. Sólo para dólar duro."),
         ("Prima contra riesgo país", "Spread menos riesgo país de ese día. Negativa: la empresa se financió más barato que el Estado."),
+        ("Crédito del sistema", "Tasa de documentos a sola firma en dólares a 90 días o más, de empresas que no son pymes. Promedio del mes. No incluye tasa variable."),
     ])]
     for titulo, filas in bloques:
         g.write(fila, 0, titulo, fmt(bold=True, font_size=12, font_color=ENCABEZADO))
@@ -414,10 +417,37 @@ def construir(archivo: Path, valores: dict, mercado: pd.DataFrame, balances: dic
     ult = 4 + len(mercado)
     M_FECHA = f"Mercado!$A$5:$A${ult}"
 
+    # --- Tasas
+    a = nueva_hoja("Tasas", "Tasas del sistema financiero", "Promedio mensual. Crédito: BCRA, cuadro VIII, empresas que no son pymes, tasa fija y repactable. Plazo fijo: datos.gob.ar. Vacío: sin operaciones o sin dato.", "#898781")
+    a.set_column("A:A", 10)
+    a.set_column("B:I", 12)
+    a.freeze_panes(4, 1)
+    a.set_row(3, 56)
+    a.write_row(3, 0, ["Mes", "Crédito USD total (%)", "Crédito USD hasta 89 días (%)", "Crédito USD 90 días o más (%)", "Crédito pesos (%)", "Plazo fijo USD (%)", "Plazo fijo pesos (%)", "Margen USD (pp)", "Margen pesos (pp)"], fmt(**{**encabezado, "text_wrap": True}))
+    fin_a = 4 + max(len(tasas), 1)
+    azul_tasa = fmt(num_format="0.00", font_color=AZUL)
+    for i, fila_t in enumerate(tasas.itertuples(index=False)):
+        f = 5 + i
+        a.write_datetime(f"A{f}", pd.Timestamp(fila_t.mes).to_pydatetime(), fmt(num_format="mmm-yy", font_color=AZUL))
+        for c, k in zip("BCDEFG", ("doc_usd", "doc_usd_corto", "doc_usd_largo", "doc_ars", "pf_usd", "pf_ars")):
+            poner(a, f"{c}{f}", float(getattr(fila_t, k)), azul_tasa)
+        formula(a, f"H{f}", f'IF(OR(B{f}="",F{f}=""),"",B{f}-F{f})', num_format="0.00")
+        formula(a, f"I{f}", f'IF(OR(E{f}="",G{f}=""),"",E{f}-G{f})', num_format="0.00")
+    g_t = wb.add_chart({"type": "line"})
+    for col, nombre, color in (("B", "Crédito en dólares", "#2A78D6"), ("F", "Plazo fijo en dólares", "#EDA100")):
+        g_t.add_series({"name": nombre, "categories": f"=Tasas!$A$5:$A${fin_a}", "values": f"=Tasas!${col}$5:${col}${fin_a}", "line": {"color": color, "width": 2.25}})
+    g_t.show_blanks_as("gap")
+    g_t.set_title({"name": "Tasa activa y pasiva en dólares", "name_font": {"name": "Arial", "size": 11}})
+    g_t.set_legend({"position": "bottom", "font": {"name": "Arial", "size": 9}})
+    g_t.set_y_axis({"num_format": '0"%"', "major_gridlines": {"visible": True, "line": {"color": LINEA}}, "num_font": {"name": "Arial", "size": 8}})
+    g_t.set_x_axis({"date_axis": True, "num_format": "mmm-yy", "major_unit": 12, "major_unit_type": "months", "num_font": {"name": "Arial", "size": 8}})
+    g_t.set_size({"width": 560, "height": 300})
+    a.insert_chart("K4", g_t)
+
     # --- Emisiones
-    n = nueva_hoja("Emisiones", "Emisiones de obligaciones negociables", "Una fila por ON o reapertura. Columnas A a K: cargá desde el aviso de resultados. L a Q: se calculan solas.", "#E34948")
+    n = nueva_hoja("Emisiones", "Emisiones de obligaciones negociables", "Una fila por ON o reapertura. Columnas A a K: cargá desde el aviso de resultados. L a S: se calculan solas.", "#E34948")
     titulos = ["Empresa", "Clase", "Fecha de emisión", "Vencimiento", "Instrumento", "Ley", "Monto (US$ M)", "Cupón", "Rendimiento", "Colocadores", "Fuente",
-               "Plazo (años)", "Riesgo país (pb)", "Tesoro (%)", "Spread (pb)", "Prima contra riesgo país (pb)", "Año"]
+               "Plazo (años)", "Riesgo país (pb)", "Tesoro (%)", "Spread (pb)", "Prima contra riesgo país (pb)", "Año", "Crédito del sistema USD (%)", "ON menos crédito (pb)"]
     n.set_row(3, 42)
     n.write_row(3, 0, titulos, fmt(**{**encabezado, "text_wrap": True}))
     n.set_column("A:A", 9)
@@ -426,7 +456,7 @@ def construir(archivo: Path, valores: dict, mercado: pd.DataFrame, balances: dic
     n.set_column("E:F", 16)
     n.set_column("G:I", 11)
     n.set_column("J:K", 26)
-    n.set_column("L:Q", 11)
+    n.set_column("L:S", 11)
     n.freeze_panes(4, 2)
     n.autofilter(3, 0, 3 + FILAS_EMISIONES, len(titulos) - 1)
     ed = dict(font_color=AZUL, bg_color=RESALTE, border=1, border_color=LINEA)
@@ -445,6 +475,8 @@ def construir(archivo: Path, valores: dict, mercado: pd.DataFrame, balances: dic
         formula(n, f"O{f}", f'IF($C{f}="","",IF($E{f}="{INSTRUMENTOS[0]}",(IF($I{f}="",$H{f},$I{f})*100-$N{f})*100,"n.a."))', num_format="0")
         formula(n, f"P{f}", f'IF($C{f}="","",IF($E{f}="{INSTRUMENTOS[0]}",$O{f}-$M{f},"n.a."))', num_format='0;(0);0')
         formula(n, f"Q{f}", f'IF($C{f}="","",YEAR($C{f}))', num_format="0")
+        formula(n, f"R{f}", f'IF($C{f}="","",IFERROR(IF(INDEX(Tasas!$D$5:$D${fin_a},MATCH($C{f},Tasas!$A$5:$A${fin_a},1))="","n.d.",INDEX(Tasas!$D$5:$D${fin_a},MATCH($C{f},Tasas!$A$5:$A${fin_a},1))),"n.d."))', font_color=VERDE, num_format="0.00", align="right")
+        formula(n, f"S{f}", f'IF($C{f}="","",IF(AND($E{f}="{INSTRUMENTOS[0]}",ISNUMBER($R{f})),(IF($I{f}="",$H{f},$I{f})*100-$R{f})*100,"n.a."))', num_format="0;(0);0", align="right")
 
     # --- Créditos
     t = nueva_hoja("Créditos", "Préstamos y prefinanciaciones", "Una fila por crédito que detalle el 20-F. Columnas A a L: cargá. M y N: se calculan solas.", "#E34948")
@@ -521,7 +553,7 @@ def leer_detalle(ruta: Path, fechas: list[str]) -> pd.DataFrame:
 def main() -> None:
     ARCHIVO.parent.mkdir(exist_ok=True)
     rescatar_manual()
-    datos = (pd.read_csv(MERCADO), leer_balances(), leer_detalle(EMISIONES, ["fecha", "vencimiento"]), leer_detalle(CREDITOS, ["inicio", "vencimiento"]))
+    datos = (pd.read_csv(MERCADO), leer_balances(), leer_detalle(EMISIONES, ["fecha", "vencimiento"]), leer_detalle(CREDITOS, ["inicio", "vencimiento"]), pd.read_csv(TASAS_SISTEMA))
     construir(ARCHIVO, {}, *datos)
     valores = calcular(ARCHIVO)
     construir(ARCHIVO, valores, *datos)
