@@ -23,6 +23,11 @@ MERCADO = ROOT / "data" / "mercado.csv"
 PLAZOS_TESORO = [1, 2, 3, 5, 7, 10]
 INSTRUMENTOS = ["Dólar duro", "Dólar linked", "Pesos tasa variable", "Pesos tasa fija", "UVA"]
 LEYES = ["Nueva York", "Argentina"]
+TIPOS_CREDITO = ["Préstamo bancario", "Prefinanciación", "Sindicado", "Pagaré", "Otro"]
+MONEDAS = ["Dólar", "Pesos"]
+TASAS = ["Fija", "Variable"]
+REFERENCIAS = ["SOFR", "BADLAR", "TAMAR", "Otra", "Ninguna"]
+FILAS_CREDITOS = 100
 FILAS_EMISIONES = 150
 EMPRESAS = ["Pampa", "YPF", "Vista"]
 ANIOS = [2021, 2022, 2023, 2024, 2025]
@@ -78,6 +83,7 @@ LINEAS = [
     ("otros_pnc", "Provisiones y otros no corrientes", None, None),
     ("pasivo", "Pasivo total", "{pc}+SUM({deuda_lp}:{otros_pnc})", None),
     ("patrimonio", "Patrimonio", None, "Incluye participación minoritaria"),
+    ("res_acum", "Resultados acumulados", None, "Parte del patrimonio, para Altman. Con signo"),
     ("deuda", "Deuda total", "{deuda_cp}+{arr_cp}+{deuda_lp}+{arr_lp}", "Incluye arrendamientos"),
     ("deuda_neta", "Deuda neta", "{deuda}-{caja}-{inv_cp}", None),
     (None, "Composición de la deuda financiera", None, None),
@@ -135,6 +141,14 @@ RATIOS = [
     ("Caja / vencimientos a 1 año", "({caja}+{inv_cp})/{v_1}", X, "v_1"),
     ("Costo medio de la deuda", "{gasto_int}/(({deuda}+{deuda_ant})/2)", P, "deuda_ant"),
     ("Días de cobro", "{creditos}/{ventas}*365", '0;(0);"-"', "ventas"),
+    ("Días de inventario", "{inventarios}/{costo}*365", '0;(0);"-"', "costo"),
+    ("Días de pago", "{proveedores}/{costo}*365", '0;(0);"-"', "costo"),
+    ("Ciclo de caja (días)", "({creditos}/{ventas}+{inventarios}/{costo}-{proveedores}/{costo})*365", '0;(0);0', "costo"),
+    ("Rotación de activos", "{ventas}/{activo}", '0.00"x"', "activo"),
+    ("Activo / patrimonio", "{activo}/{patrimonio}", X, "patrimonio"),
+    ("Capex / ventas", "{capex}/{ventas}", P, "ventas"),
+    ("Capex / depreciación", "{capex}/{amort}", X, "amort"),
+    ("Altman Z'' mercados emergentes", "3.25+6.56*({ac}-{pc})/{activo}+3.26*{res_acum}/{activo}+6.72*{ebit}/{activo}+1.05*{patrimonio}/{pasivo}", "0.00;(0.00)", "activo"),
 ]
 FILA_COMPARA = 7
 FILA_BLOQUES = FILA_COMPARA + len(RATIOS) + 2
@@ -203,6 +217,7 @@ def construir(archivo: Path, valores: dict, mercado: pd.DataFrame) -> None:
         ("5. Fuente", "En la fila Fuente anotá el 20-F y la página. Usá el dato más nuevo si un año fue reexpresado."),
         ("6. Control", "Copiá el activo y el resultado neto informados. Un año está cargado cuando su Estado dice OK."),
         ("7. Emisiones", "En Emisiones cargá una fila por ON o reapertura, desde el aviso de resultados. Las columnas de la derecha se calculan solas."),
+        ("8. Créditos", "En Créditos cargá una fila por préstamo o prefinanciación que detalle el 20-F, con su saldo al cierre."),
     ]), ("Ejemplo de la línea Costo de ventas", [
         ("Dato del 20-F", "Si el informe muestra (1.234,5), cargá 1234,5 en positivo. Es un valor de ejemplo, no un dato de la empresa."),
         ("Fila de Emisiones", "Empresa, clase, fecha de emisión, vencimiento, instrumento, ley, monto en US$ M, cupón, rendimiento, colocadores y fuente. Si se colocó a la par, el rendimiento es el cupón."),
@@ -210,6 +225,7 @@ def construir(archivo: Path, valores: dict, mercado: pd.DataFrame) -> None:
         ("EBITDA", "Resultado operativo sin asociadas + depreciación y amortización + deterioro. No es el EBITDA ajustado que publica cada empresa."),
         ("Deuda", "Deuda financiera corriente y no corriente, con arrendamientos."),
         ("Cobertura de servicio de deuda", "Flujo operativo antes de intereses / (intereses pagados + deuda y arrendamientos corrientes del año anterior)."),
+        ("Altman Z'' EM", "Versión para mercados emergentes: 3,25 + 6,56 capital de trabajo/activo + 3,26 resultados acumulados/activo + 6,72 resultado operativo/activo + 1,05 patrimonio/pasivo. Es una referencia, no un rating."),
         ("Spread", "Rendimiento de la emisión menos la tasa del Tesoro de EE.UU. del plazo inmediato inferior, en puntos básicos. Sólo para dólar duro."),
         ("Prima contra riesgo país", "Spread menos riesgo país de ese día. Negativa: la empresa se financió más barato que el Estado."),
     ])]
@@ -312,6 +328,53 @@ def construir(archivo: Path, valores: dict, mercado: pd.DataFrame) -> None:
     g_ap.set_size({"width": 500, "height": 300})
     r.insert_chart("H6", g_ap)
 
+    # --- Estructura
+    v = nueva_hoja("Estructura", "Análisis vertical", "Cada línea como porcentaje de las ventas o del activo.", "#6250D6")
+    v.set_column("A:A", 34)
+    v.set_column("B:F", 11)
+    vertical = [("Costo de ventas / ventas", "costo", "ventas"), ("EBITDA / ventas", "ebitda", "ventas"), ("Resultado operativo / ventas", "ebit", "ventas"), ("Resultado neto / ventas", "neto", "ventas"),
+                ("Activo corriente / activo", "ac", "activo"), ("Propiedad, planta y equipo / activo", "ppe", "activo"), ("Deuda total / activo", "deuda", "activo"),
+                ("Pasivo total / activo", "pasivo", "activo"), ("Patrimonio / activo", "patrimonio", "activo")]
+    for k, e in enumerate(EMPRESAS):
+        ini = 4 + k * (len(vertical) + 3)
+        v.write(f"A{ini}", e, fmt(bold=True, font_color=ENCABEZADO))
+        v.write(f"A{ini + 1}", "% de", fmt(**encabezado))
+        for j, a in enumerate(ANIOS):
+            v.write(f"{COLUMNAS[j]}{ini + 1}", a, fmt(**encabezado))
+        for i, (texto, num, den) in enumerate(vertical):
+            f = ini + 2 + i
+            v.write(f"A{f}", texto, fmt())
+            for col in COLUMNAS:
+                formula(v, f"{col}{f}", f'IF({ref(e, den, col)}=0,"n.d.",{ref(e, num, col)}/{ref(e, den, col)})', font_color=VERDE, num_format=P, align="right")
+
+    # --- Fuentes y usos
+    u = nueva_hoja("Fuentes y usos", "Fuentes y usos de fondos", "De dónde salió la plata cada año y en qué se usó. US$ millones.", "#6250D6")
+    u.set_column("A:A", 38)
+    u.set_column("B:E", 11)
+    u.set_column("F:F", 60)
+    filas_u = [("Flujo operativo antes de intereses", lambda e, c, a: ref(e, "cfo", c), None), ("Intereses pagados", lambda e, c, a: "-" + ref(e, "int_pag", c), None),
+               ("Capex", lambda e, c, a: "-" + ref(e, "capex", c), None), ("Dividendos y recompras", lambda e, c, a: "-" + ref(e, "dividendos", c), None),
+               ("Variación de deuda", lambda e, c, a: f"{ref(e, 'deuda', c)}-{ref(e, 'deuda', a)}", "Del balance: incluye efectos sin movimiento de caja"),
+               ("Otros", None, "Diferencia hasta la variación de caja"),
+               ("Variación de caja e inversiones", lambda e, c, a: f"{ref(e, 'caja', c)}+{ref(e, 'inv_cp', c)}-{ref(e, 'caja', a)}-{ref(e, 'inv_cp', a)}", None)]
+    for k, e in enumerate(EMPRESAS):
+        ini = 4 + k * (len(filas_u) + 3)
+        u.write(f"A{ini}", e, fmt(bold=True, font_color=ENCABEZADO))
+        u.write(f"A{ini + 1}", "US$ millones", fmt(**encabezado))
+        for j, a in enumerate(ANIOS[1:]):
+            u.write(f"{'BCDE'[j]}{ini + 1}", a, fmt(**encabezado))
+        for i, (texto, calculo, nota) in enumerate(filas_u):
+            f = ini + 2 + i
+            u.write(f"A{f}", texto, fmt(**(dict(bold=True, top=1, top_color=LINEA) if i == len(filas_u) - 1 else {})))
+            if nota:
+                u.write(f"F{f}", nota, fmt(font_color=GRIS, font_size=8))
+            for j, col in enumerate("BCDE"):
+                actual, anterior = COLUMNAS[j + 1], COLUMNAS[j]
+                cuerpo = f"{col}{ini + 8}-SUM({col}{ini + 2}:{col}{ini + 6})" if calculo is None else calculo(e, actual, anterior)
+                cargado = f"OR({ref(e, 'ventas', actual)}=0,{ref(e, 'ventas', anterior)}=0)"
+                extra = dict(font_color=VERDE) if calculo else {}
+                formula(u, f"{col}{f}", f'IF({cargado},"n.d.",{cuerpo})', num_format=MIL, align="right", **extra)
+
     # --- Mercado
     k = nueva_hoja("Mercado", "Series de mercado", "Riesgo país: ArgentinaDatos. Tesoro de EE.UU.: FRED. BADLAR y adelantos a empresas: BCRA. Se actualiza con python -m empresas.mercado.", "#898781")
     k.set_column("A:A", 12)
@@ -364,6 +427,29 @@ def construir(archivo: Path, valores: dict, mercado: pd.DataFrame) -> None:
         formula(n, f"O{f}", f'IF($C{f}="","",IF($E{f}="{INSTRUMENTOS[0]}",($I{f}*100-$N{f})*100,"n.a."))', num_format="0")
         formula(n, f"P{f}", f'IF($C{f}="","",IF($E{f}="{INSTRUMENTOS[0]}",$O{f}-$M{f},"n.a."))', num_format='0;(0);0')
         formula(n, f"Q{f}", f'IF($C{f}="","",YEAR($C{f}))', num_format="0")
+
+    # --- Créditos
+    t = nueva_hoja("Créditos", "Préstamos y prefinanciaciones", "Una fila por crédito que detalle el 20-F. Columnas A a L: cargá. M y N: se calculan solas.", "#E34948")
+    titulos_c = ["Empresa", "Año de cierre", "Tipo", "Acreedor", "Moneda", "Tasa", "Referencia", "Tasa o margen", "Inicio", "Vencimiento", "Saldo (US$ M)", "Fuente", "Plazo (años)", "Peso en la deuda"]
+    t.set_row(3, 30)
+    t.write_row(3, 0, titulos_c, fmt(**{**encabezado, "text_wrap": True}))
+    t.set_column("A:C", 12)
+    t.set_column("D:D", 24)
+    t.set_column("E:K", 11)
+    t.set_column("L:L", 26)
+    t.set_column("M:N", 11)
+    t.freeze_panes(4, 1)
+    t.autofilter(3, 0, 3 + FILAS_CREDITOS, len(titulos_c) - 1)
+    fin_t = 4 + FILAS_CREDITOS
+    for rango, lista in (("A", EMPRESAS), ("B", ANIOS), ("C", TIPOS_CREDITO), ("E", MONEDAS), ("F", TASAS), ("G", REFERENCIAS)):
+        t.data_validation(f"{rango}5:{rango}{fin_t}", {"validate": "list", "source": lista})
+    formatos_c = ["", "0", "", "", "", "", "", "0.00%", "dd/mm/yyyy", "dd/mm/yyyy", "#,##0.0", ""]
+    for f in range(5, fin_t + 1):
+        for c, nf in zip("ABCDEFGHIJKL", formatos_c):
+            t.write_blank(f"{c}{f}", None, fmt(**ed, **({"num_format": nf} if nf else {})))
+        formula(t, f"M{f}", f'IF(OR($I{f}="",$J{f}=""),"",($J{f}-$I{f})/365.25)', num_format="0.0")
+        deuda_e = "+".join(f'($A{f}="{e}")*INDEX(\'{e}\'!$B${FILAS["deuda"]}:$F${FILAS["deuda"]},MATCH($B{f},\'{e}\'!$B$6:$F$6,0))' for e in EMPRESAS)
+        formula(t, f"N{f}", f'IF(OR($A{f}="",$B{f}="",$K{f}=""),"",IFERROR($K{f}/({deuda_e}),"n.d."))', font_color=VERDE, num_format=P)
 
     wb.set_properties({"title": "Análisis crediticio de empresas", "author": "Lucas Alvarez"})
     wb.close()

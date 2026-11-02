@@ -2,7 +2,7 @@
 
 ## Pregunta
 
-Pampa, YPF y Vista se financian en el mercado y en bancos. ¿Cuándo conviene cada instrumento según plazo, moneda y momento, y qué lugar le queda al banco?
+¿Qué tan sólidas son Pampa, YPF y Vista, cómo se financian y cómo cambió esa elección con el tiempo? ¿Qué lugar le queda al banco?
 
 ## Tres miradas
 
@@ -14,13 +14,19 @@ Pampa, YPF y Vista se financian en el mercado y en bancos. ¿Cuándo conviene ca
 
 ## Partes
 
-1. **Balances comparados:** cinco años, controles de cuadre y ratios con una definición común.
-2. **Estructura de deuda:** mezcla de ON y bancos, moneda, tasa fija y vencimientos.
+1. **Análisis de balances (foco principal):** cinco años, análisis vertical, rentabilidad, capital de trabajo, cobertura, liquidez, fuentes y usos, y Altman como referencia.
+2. **Créditos y deuda (foco siguiente):** ON, préstamos bancarios y prefinanciación de exportaciones, por moneda, tasa fija o variable, plazo y vencimientos.
 3. **Emisiones:** cada ON con su fecha, plazo, moneda, ley, rendimiento, spread, riesgo país y colocadores.
-4. **Momento:** spread y monto emitido según riesgo país, tasa del Tesoro, vencimientos cercanos y capex.
+4. **Tendencias de financiamiento:** cómo cambió la elección entre ON y crédito, dólares y pesos, y tasa fija y variable.
 5. **Rol del banco:** quién coloca, y rendimiento de la ON contra el crédito cuando haya tasas comparables.
 6. **Crédito:** rating interno, proyección a tres años, estrés por renovar deuda más cara y covenants.
 7. **Memo:** recomendación de línea de crédito para Pampa y guía de decisión por instrumento.
+
+## Datos y modelos
+
+- **Tendencias:** participación de cada instrumento por empresa y trimestre, comparada con riesgo país, Tesoro y tasas locales.
+- **Elección de instrumento:** regresión logística sobre las emisiones para ver qué condiciones acompañan elegir dólares o pesos, y tasa fija o variable. Coeficientes interpretables, sin predicción.
+- **Validación:** con pocas emisiones se informan rangos de incertidumbre y se comparan contra la participación media.
 
 ## Límites
 
@@ -28,4 +34,6 @@ Pampa, YPF y Vista se financian en el mercado y en bancos. ¿Cuándo conviene ca
 - Sólo se comparan instrumentos de igual moneda y plazo parecido.
 - Las tasas del BCRA son del sistema y en pesos: dan contexto, no el costo de estas empresas.
 - El detalle de tasas de préstamos bancarios depende de lo que informe cada 20-F.
+- La API del BCRA no trae tasas de crédito en dólares: esa comparación depende de los 20-F.
+- Sólo se conoce el saldo de crédito al cierre de cada año, no cada préstamo tomado durante el año.
 - Sólo se ven las emisiones hechas: no se observan las que una empresa decidió no hacer.

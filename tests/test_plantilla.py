@@ -11,7 +11,7 @@ EJEMPLO = {"ventas": 1000, "costo": 600, "comercial": 50, "admin": 40, "explor":
            "asociadas": 10, "ing_fin": 20, "gasto_int": 50, "otros_fin": -10, "impuesto": 60, "neto_inf": 210,
            "caja": 100, "inv_cp": 50, "creditos": 150, "inventarios": 80, "otros_ac": 20, "ppe": 1200, "intang": 100, "inv_asoc": 150, "otros_anc": 50,
            "activo_inf": 1900, "deuda_cp": 100, "arr_cp": 10, "proveedores": 120, "otros_pc": 70, "deuda_lp": 500, "arr_lp": 40, "otros_pnc": 160,
-           "patrimonio": 900, "cfo": 350, "capex": 200, "int_pag": 45, "dividendos": 30,
+           "patrimonio": 900, "res_acum": 300, "cfo": 350, "capex": 200, "int_pag": 45, "dividendos": 30,
            "d_on": 500, "d_bancos": 60, "d_prefin": 30, "d_otra": 10, "m_dolar": 550, "m_linked": 20, "m_pesos": 30, "m_otra": 0,
            "v_1": 100, "v_2": 150, "v_3": 200, "v_mas": 150, "tasa_fija": 480}
 MERCADO = pd.DataFrame({"fecha": ["2024-01-02", "2024-01-03"], "riesgo_pais": [1900, 800], "ust_1": [4.0, 4.1], "ust_2": [4.2, 4.3], "ust_3": [4.3, 4.4],
@@ -31,6 +31,9 @@ def calculado(tmp_path_factory):
     fila.update(E="Pesos tasa variable", C=datetime(2024, 1, 2))
     for col, valor in fila.items():
         e[f"{col}6"] = valor
+    c = wb["Créditos"]
+    for col, valor in dict(A="Pampa", B=2025, C="Prefinanciación", E="Dólar", F="Variable", G="SOFR", H=0.03, I=datetime(2024, 1, 1), J=datetime(2026, 1, 1), K=65).items():
+        c[f"{col}5"] = valor
     ws = wb["Pampa"]
     assert set(EJEMPLO) == set(p.CARGA)
     for col in p.COLUMNAS:
@@ -97,6 +100,31 @@ def test_composicion_entra_en_el_control_y_en_los_ratios(calculado):
     assert v[("RATIOS", bloque(indice("ON / deuda financiera"), "F"))] == pytest.approx(500 / 600)
     assert v[("RATIOS", bloque(indice("Caja / vencimientos a 1 año"), "F"))] == pytest.approx(150 / 100)
     assert v[("RATIOS", bloque(indice("Costo medio de la deuda"), "F"))] == pytest.approx(50 / 650)
+
+
+def test_balance_a_fondo_a_mano(calculado):
+    v, _ = calculado
+    assert v[("RATIOS", bloque(indice("Ciclo de caja (días)"), "F"))] == pytest.approx((150 / 1000 + 80 / 600 - 120 / 600) * 365)
+    assert v[("RATIOS", bloque(indice("Rotación de activos"), "F"))] == pytest.approx(1000 / 1900)
+    altman = 3.25 + 6.56 * 100 / 1900 + 3.26 * 300 / 1900 + 6.72 * 300 / 1900 + 1.05 * 900 / 1000
+    assert v[("RATIOS", bloque(indice("Altman Z'' mercados emergentes"), "F"))] == pytest.approx(altman)
+    assert v[("ESTRUCTURA", "F7")] == pytest.approx(405 / 1000)
+
+
+def test_fuentes_y_usos_cierra_con_la_variacion_de_caja(calculado):
+    v, _ = calculado
+    h = "FUENTES Y USOS"
+    assert v[(h, "E6")] == 350
+    assert v[(h, "E7")] == -45
+    assert v[(h, "E10")] == 0
+    assert v[(h, "E12")] == 0
+    assert sum(v[(h, f"E{f}")] for f in range(6, 12)) == pytest.approx(v[(h, "E12")])
+
+
+def test_credito_calcula_plazo_y_peso_en_la_deuda(calculado):
+    v, _ = calculado
+    assert v[("CRÉDITOS", "M5")] == pytest.approx(2.0, abs=0.01)
+    assert v[("CRÉDITOS", "N5")] == pytest.approx(65 / 650)
 
 
 def test_un_descuadre_se_marca(tmp_path):
