@@ -146,6 +146,17 @@ def test_vista_cierra_contra_sus_estados_contables():
     assert h[f"F{p.FILAS['ebitda']}"].value == pytest.approx(1537.455, abs=0.002)
 
 
+def test_pampa_cierra_contra_su_20f():
+    wb = openpyxl.load_workbook(p.ARCHIVO, data_only=True)
+    h = wb["Pampa"]
+    assert [h[f"{c}{p.FILAS['estado']}"].value for c in "DEF"] == ["OK"] * 3
+    for col, (operativo, neto, ac) in {"E": (440, 619, 2380), "F": (503, 378, 1988)}.items():
+        assert h[f"{col}{p.FILAS['ebit']}"].value + h[f"{col}{p.FILAS['asociadas']}"].value == operativo
+        assert h[f"{col}{p.FILAS['neto']}"].value == neto
+        assert h[f"{col}{p.FILAS['ac']}"].value == ac
+    assert h[f"D{p.FILAS['ebit']}"].value + h[f"D{p.FILAS['asociadas']}"].value == 424
+
+
 def test_el_detalle_de_vista_suma_el_total_de_deuda():
     e = pd.read_csv(p.EMISIONES, encoding="utf-8")
     c = pd.read_csv(p.CREDITOS, encoding="utf-8")
@@ -162,6 +173,7 @@ def test_el_rescate_guarda_lo_cargado_a_mano(tmp_path, monkeypatch):
     wb.save(archivo)
     monkeypatch.setattr(p, "ARCHIVO", archivo)
     monkeypatch.setattr(p, "BALANCES", balances)
+    monkeypatch.setattr(p, "CARGA_MANUAL", ["Pampa"])
     p.rescatar_manual()
     d = p.leer_balances()
     assert d[("Pampa", 2025, "ventas")] == 123

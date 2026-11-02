@@ -24,7 +24,7 @@ BALANCES = ROOT / "data" / "balances.csv"
 EMISIONES = ROOT / "data" / "emisiones.csv"
 CREDITOS = ROOT / "data" / "creditos.csv"
 TASAS_SISTEMA = ROOT / "data" / "tasas.csv"
-CARGA_MANUAL = ["Pampa"]
+CARGA_MANUAL: list[str] = []  # hojas que se cargan a mano en el Excel; hoy todas salen de data/balances.csv
 PLAZOS_TESORO = [1, 2, 3, 5, 7, 10]
 INSTRUMENTOS = ["Dólar duro", "Dólar linked", "Pesos tasa variable", "Pesos tasa fija", "UVA"]
 LEYES = ["Nueva York", "Argentina"]
@@ -89,7 +89,7 @@ LINEAS = [
     ("otros_pnc", "Provisiones y otros no corrientes", None, None),
     ("pasivo", "Pasivo total", "{pc}+SUM({deuda_lp}:{otros_pnc})", None),
     ("patrimonio", "Patrimonio", None, "Incluye participación minoritaria"),
-    ("res_acum", "Resultados acumulados", None, "Parte del patrimonio, para Altman. Con signo"),
+    ("res_acum", "Resultados acumulados", None, "Resultados no asignados + reservas legal y voluntaria, para Altman. Con signo"),
     ("deuda", "Deuda total", "{deuda_cp}+{arr_cp}+{deuda_lp}+{arr_lp}", "Incluye arrendamientos"),
     ("deuda_neta", "Deuda neta", "{deuda}-{caja}-{inv_cp}", None),
     (None, "Composición de la deuda financiera", None, None),
