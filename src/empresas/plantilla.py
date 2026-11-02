@@ -2,29 +2,33 @@
 
 `python -m empresas.plantilla` escribe excel/analisis_crediticio.xlsx con una hoja de carga por empresa, controles
 de cuadre y ratios comparados. Los balances se cargan a mano desde los 20-F: el archivo es la fuente de esos datos,
-así que el comando no pisa uno que ya exista salvo que se le pase --forzar.
+así que el comando rescata primero lo cargado en las hojas manuales y lo guarda en data/balances.csv.
 Usa funciones de Excel 2016.
 """
 
 from __future__ import annotations
 
 import re
-import sys
 from pathlib import Path
 
 import formulas
 import numpy as np
+import openpyxl
 import pandas as pd
 import xlsxwriter
 
 ROOT = Path(__file__).resolve().parents[2]
 ARCHIVO = ROOT / "excel" / "analisis_crediticio.xlsx"
 MERCADO = ROOT / "data" / "mercado.csv"
+BALANCES = ROOT / "data" / "balances.csv"
+EMISIONES = ROOT / "data" / "emisiones.csv"
+CREDITOS = ROOT / "data" / "creditos.csv"
+CARGA_MANUAL = ["Pampa"]
 PLAZOS_TESORO = [1, 2, 3, 5, 7, 10]
 INSTRUMENTOS = ["Dólar duro", "Dólar linked", "Pesos tasa variable", "Pesos tasa fija", "UVA"]
 LEYES = ["Nueva York", "Argentina"]
 TIPOS_CREDITO = ["Préstamo bancario", "Prefinanciación", "Sindicado", "Pagaré", "Otro"]
-MONEDAS = ["Dólar", "Pesos"]
+MONEDAS = ["Dólar", "Dólar linked", "Pesos"]
 TASAS = ["Fija", "Variable"]
 REFERENCIAS = ["SOFR", "BADLAR", "TAMAR", "Otra", "Ninguna"]
 FILAS_CREDITOS = 100
@@ -49,9 +53,10 @@ LINEAS = [
     ("explor", "Gastos de exploración", None, "Positivo"),
     ("otros_op", "Otros resultados operativos netos", None, "Con signo: ganancia positiva"),
     ("deterioro", "Deterioro de activos", None, "Cargo positivo, recupero negativo"),
+    ("no_rec", "Resultados no recurrentes", None, "Ya incluidos en las líneas de arriba. Ganancia positiva. Sólo se restan del EBITDA"),
     ("ebit", "Resultado operativo", "{bruto}-{comercial}-{admin}-{explor}+{otros_op}-{deterioro}", "Sin asociadas, aunque la empresa las incluya"),
     ("amort", "Depreciación y amortización", None, "Del estado de flujo; ya está dentro de costos y gastos"),
-    ("ebitda", "EBITDA", "{ebit}+{amort}+{deterioro}", "Definición propia y común a las tres empresas"),
+    ("ebitda", "EBITDA", "{ebit}+{amort}+{deterioro}-{no_rec}", "Definición propia y común a las tres empresas"),
     ("asociadas", "Resultado de asociadas", None, "Con signo"),
     ("ing_fin", "Ingresos financieros", None, "Positivo"),
     ("gasto_int", "Intereses devengados", None, "Positivo"),
@@ -95,10 +100,10 @@ LINEAS = [
     ("m_linked", "Dólar linked", None, None),
     ("m_pesos", "En pesos", None, "Incluye UVA"),
     ("m_otra", "Otras monedas", None, None),
-    ("v_1", "Vence en 1 año", None, "Total por vencimiento"),
-    ("v_2", "Vence en 2 años", None, None),
-    ("v_3", "Vence en 3 años", None, None),
-    ("v_mas", "Vence en más de 3 años", None, None),
+    ("v_1", "Vence en menos de 1 año", None, "Total por vencimiento"),
+    ("v_2", "Vence de 1 a 2 años", None, None),
+    ("v_3", "Vence de 2 a 5 años", None, None),
+    ("v_mas", "Vence en más de 5 años", None, None),
     ("tasa_fija", "Deuda a tasa fija", None, None),
     (None, "Flujo de fondos", None, None),
     ("cfo", "Flujo operativo antes de intereses", None, "Si el 20-F ya restó los intereses pagados, volvé a sumarlos"),
@@ -113,7 +118,7 @@ LINEAS = [
     ("dif_tipo", "Deuda por tipo - balance", "SUM({d_on}:{d_otra})-{deuda_cp}-{deuda_lp}", None),
     ("dif_moneda", "Deuda por moneda - balance", "SUM({m_dolar}:{m_otra})-{deuda_cp}-{deuda_lp}", None),
     ("dif_vto", "Deuda por vencimiento - balance", "SUM({v_1}:{v_mas})-{deuda_cp}-{deuda_lp}", "Puede diferir si el 20-F abre vencimientos contractuales con intereses: anotalo en Fuente"),
-    ("estado", "Estado", 'IF({ventas}=0,"Sin cargar",IF(AND(ABS({dif_balance})<=$B$4,ABS({dif_activo})<=$B$4,ABS({dif_neto})<=$B$4,ABS({dif_tipo})<=$B$4,ABS({dif_moneda})<=$B$4,ABS({dif_vto})<=$B$4),"OK","Revisar"))', None),
+    ("estado", "Estado", 'IF({ventas}=0,"Sin cargar",IF(AND(ABS({dif_balance})<=$B$4,ABS({dif_activo})<=$B$4,ABS({dif_neto})<=$B$4,OR(SUM({d_on}:{d_otra})=0,ABS({dif_tipo})<=$B$4),OR(SUM({m_dolar}:{m_otra})=0,ABS({dif_moneda})<=$B$4),OR(SUM({v_1}:{v_mas})=0,ABS({dif_vto})<=$B$4)),"OK","Revisar"))', "Los bloques de deuda vacíos no se controlan: el detalle no siempre se publica"),
 ]
 FILAS = {clave: FILA_INICIO + i for i, (clave, *_) in enumerate(LINEAS) if clave}
 CARGA = [clave for clave, _, formula, _ in LINEAS if clave and formula is None]
@@ -176,7 +181,8 @@ def formula_ratio(hoja: str, plantilla: str, i: int) -> str | None:
     return None if faltan else f
 
 
-def construir(archivo: Path, valores: dict, mercado: pd.DataFrame) -> None:
+def construir(archivo: Path, valores: dict, mercado: pd.DataFrame, balances: dict | None = None, emisiones: pd.DataFrame | None = None, creditos: pd.DataFrame | None = None) -> None:
+    balances = balances or {}
     wb = xlsxwriter.Workbook(archivo)
     cache: dict = {}
 
@@ -204,6 +210,14 @@ def construir(archivo: Path, valores: dict, mercado: pd.DataFrame) -> None:
 
     encabezado = dict(bold=True, font_color="#FFFFFF", bg_color=ENCABEZADO, align="center", border=1, border_color=ENCABEZADO)
 
+    def poner(ws, celda: str, valor, formato) -> None:
+        if valor is None or (isinstance(valor, float) and np.isnan(valor)):
+            ws.write_blank(celda, None, formato)
+        elif isinstance(valor, pd.Timestamp):
+            ws.write_datetime(celda, valor.to_pydatetime(), formato)
+        else:
+            ws.write(celda, valor, formato)
+
     # --- Guía
     g = nueva_hoja("Guía", "Análisis crediticio de empresas", "¿Le prestaría a esta empresa, cuánto y con qué condiciones?")
     g.set_column("A:A", 30)
@@ -222,7 +236,7 @@ def construir(archivo: Path, valores: dict, mercado: pd.DataFrame) -> None:
         ("Dato del 20-F", "Si el informe muestra (1.234,5), cargá 1234,5 en positivo. Es un valor de ejemplo, no un dato de la empresa."),
         ("Fila de Emisiones", "Empresa, clase, fecha de emisión, vencimiento, instrumento, ley, monto en US$ M, cupón, rendimiento, colocadores y fuente. Si se colocó a la par, el rendimiento es el cupón."),
     ]), ("Definiciones", [
-        ("EBITDA", "Resultado operativo sin asociadas + depreciación y amortización + deterioro. No es el EBITDA ajustado que publica cada empresa."),
+        ("EBITDA", "Resultado operativo sin asociadas + depreciación y amortización + deterioro - resultados no recurrentes. No es el EBITDA ajustado que publica cada empresa."),
         ("Deuda", "Deuda financiera corriente y no corriente, con arrendamientos."),
         ("Cobertura de servicio de deuda", "Flujo operativo antes de intereses / (intereses pagados + deuda y arrendamientos corrientes del año anterior)."),
         ("Altman Z'' EM", "Versión para mercados emergentes: 3,25 + 6,56 capital de trabajo/activo + 3,26 resultados acumulados/activo + 6,72 resultado operativo/activo + 1,05 patrimonio/pasivo. Es una referencia, no un rating."),
@@ -253,7 +267,9 @@ def construir(archivo: Path, valores: dict, mercado: pd.DataFrame) -> None:
         h.write("A4", "Tolerancia del control (US$ M)", fmt())
         h.write("B4", 2, fmt(**celda))
         h.write("A5", "Fuente (20-F y página)", fmt())
-        h.write_row("B5", [None] * 5, fmt(font_color=AZUL, bg_color=RESALTE, border=1, border_color=LINEA, text_wrap=True, font_size=8))
+        h.set_row(4, 34)
+        for col, a in zip(COLUMNAS, ANIOS):
+            poner(h, f"{col}5", balances.get((e, a, "fuente")), fmt(font_color=AZUL, bg_color=RESALTE, border=1, border_color=LINEA, text_wrap=True, font_size=8))
         h.write("A6", "US$ millones", fmt(**encabezado))
         for j, a in enumerate(ANIOS):
             h.write(5, 1 + j, a, fmt(**encabezado))
@@ -268,9 +284,9 @@ def construir(archivo: Path, valores: dict, mercado: pd.DataFrame) -> None:
             h.write(f"A{f}", texto, fmt(**fuerte))
             if ayuda:
                 h.write(f"G{f}", ayuda, fmt(font_color=GRIS, font_size=8))
-            for col in COLUMNAS:
+            for col, a in zip(COLUMNAS, ANIOS):
                 if plantilla is None:
-                    h.write_blank(f"{col}{f}", None, fmt(**celda))
+                    poner(h, f"{col}{f}", balances.get((e, a, clave)), fmt(**celda))
                 else:
                     texto_f = re.sub(r"\{(\w+)\}", lambda m: f"{col}{FILAS[m.group(1)]}", plantilla)
                     extra = dict(align="center") if clave == "estado" else dict(num_format=MIL)
@@ -308,7 +324,8 @@ def construir(archivo: Path, valores: dict, mercado: pd.DataFrame) -> None:
                     continue
                 den = formula_ratio(e, "{" + denominador + "}", j)
                 ventas = ref(e, "ventas", col)
-                formula(r, f"{col}{f}", f'IF({ventas}=0,"n.d.",IF({den}<=0,"n.s.",{cuerpo}))', font_color=VERDE, num_format=formato, align="right")
+                falta = f"OR({ventas}=0,{ref(e, 'ventas', COLUMNAS[j - 1])}=0)" if "_ant" in plantilla else f"{ventas}=0"
+                formula(r, f"{col}{f}", f'IF({falta},"n.d.",IF({den}<=0,"n.s.",{cuerpo}))', font_color=VERDE, num_format=formato, align="right")
     for i, (texto, _, formato, _) in enumerate(RATIOS):
         f = FILA_COMPARA + 1 + i
         r.write(f"A{f}", texto, fmt())
@@ -419,12 +436,13 @@ def construir(archivo: Path, valores: dict, mercado: pd.DataFrame) -> None:
     n.data_validation(f"E5:E{fin_e}", {"validate": "list", "source": INSTRUMENTOS})
     n.data_validation(f"F5:F{fin_e}", {"validate": "list", "source": LEYES})
     for f in range(5, fin_e + 1):
-        for c, nf in zip("ABCDEFGHIJK", formatos):
-            n.write_blank(f"{c}{f}", None, fmt(**ed, **({"num_format": nf} if nf else {})))
+        for j, (c, nf) in enumerate(zip("ABCDEFGHIJK", formatos)):
+            valor = emisiones.iat[f - 5, j] if emisiones is not None and f - 5 < len(emisiones) else None
+            poner(n, f"{c}{f}", valor, fmt(**ed, **({"num_format": nf} if nf else {})))
         formula(n, f"L{f}", f'IF($C{f}="","",($D{f}-$C{f})/365.25)', num_format="0.0")
         formula(n, f"M{f}", f'IF($C{f}="","",INDEX(Mercado!$B$5:$B${ult},MATCH($C{f},{M_FECHA},1)))', font_color=VERDE, num_format="0")
         formula(n, f"N{f}", f'IF($C{f}="","",INDEX(Mercado!$C$5:$H${ult},MATCH($C{f},{M_FECHA},1),MATCH(MAX($L{f},1),Mercado!$C$4:$H$4,1)))', font_color=VERDE, num_format="0.00")
-        formula(n, f"O{f}", f'IF($C{f}="","",IF($E{f}="{INSTRUMENTOS[0]}",($I{f}*100-$N{f})*100,"n.a."))', num_format="0")
+        formula(n, f"O{f}", f'IF($C{f}="","",IF($E{f}="{INSTRUMENTOS[0]}",(IF($I{f}="",$H{f},$I{f})*100-$N{f})*100,"n.a."))', num_format="0")
         formula(n, f"P{f}", f'IF($C{f}="","",IF($E{f}="{INSTRUMENTOS[0]}",$O{f}-$M{f},"n.a."))', num_format='0;(0);0')
         formula(n, f"Q{f}", f'IF($C{f}="","",YEAR($C{f}))', num_format="0")
 
@@ -445,8 +463,9 @@ def construir(archivo: Path, valores: dict, mercado: pd.DataFrame) -> None:
         t.data_validation(f"{rango}5:{rango}{fin_t}", {"validate": "list", "source": lista})
     formatos_c = ["", "0", "", "", "", "", "", "0.00%", "dd/mm/yyyy", "dd/mm/yyyy", "#,##0.0", ""]
     for f in range(5, fin_t + 1):
-        for c, nf in zip("ABCDEFGHIJKL", formatos_c):
-            t.write_blank(f"{c}{f}", None, fmt(**ed, **({"num_format": nf} if nf else {})))
+        for j, (c, nf) in enumerate(zip("ABCDEFGHIJKL", formatos_c)):
+            valor = creditos.iat[f - 5, j] if creditos is not None and f - 5 < len(creditos) else None
+            poner(t, f"{c}{f}", valor, fmt(**ed, **({"num_format": nf} if nf else {})))
         formula(t, f"M{f}", f'IF(OR($I{f}="",$J{f}=""),"",($J{f}-$I{f})/365.25)', num_format="0.0")
         deuda_e = "+".join(f'($A{f}="{e}")*INDEX(\'{e}\'!$B${FILAS["deuda"]}:$F${FILAS["deuda"]},MATCH($B{f},\'{e}\'!$B$6:$F$6,0))' for e in EMPRESAS)
         formula(t, f"N{f}", f'IF(OR($A{f}="",$B{f}="",$K{f}=""),"",IFERROR($K{f}/({deuda_e}),"n.d."))', font_color=VERDE, num_format=P)
@@ -471,14 +490,41 @@ def calcular(archivo: Path) -> dict:
     return valores
 
 
+def rescatar_manual() -> None:
+    """Pasa a data/balances.csv lo cargado a mano en el Excel, para que regenerar el archivo no lo pierda."""
+    if not ARCHIVO.exists():
+        return
+    wb = openpyxl.load_workbook(ARCHIVO, data_only=True)
+    filas = []
+    for e in CARGA_MANUAL:
+        for col, a in zip(COLUMNAS, ANIOS):
+            filas += [(e, a, clave, wb[e][f"{col}{FILAS[clave]}"].value) for clave in CARGA]
+            filas.append((e, a, "fuente", wb[e][f"{col}5"].value))
+    nuevas = pd.DataFrame(filas, columns=["empresa", "anio", "clave", "valor"]).dropna()
+    viejas = pd.read_csv(BALANCES, encoding="utf-8")
+    viejas = viejas[~viejas.empresa.isin(CARGA_MANUAL)]
+    pd.concat([viejas, nuevas]).to_csv(BALANCES, index=False, encoding="utf-8")
+
+
+def leer_balances() -> dict:
+    d = pd.read_csv(BALANCES, encoding="utf-8")
+    return {(r.empresa, int(r.anio), r.clave): (r.valor if r.clave == "fuente" else float(r.valor)) for r in d.itertuples(index=False)}
+
+
+def leer_detalle(ruta: Path, fechas: list[str]) -> pd.DataFrame:
+    d = pd.read_csv(ruta, encoding="utf-8")
+    for c in fechas:
+        d[c] = pd.to_datetime(d[c])
+    return d.astype(object).where(d.notna(), None)
+
+
 def main() -> None:
-    if ARCHIVO.exists() and "--forzar" not in sys.argv:
-        raise SystemExit(f"{ARCHIVO.name} ya existe y puede tener datos cargados. Usá --forzar para reemplazarlo.")
     ARCHIVO.parent.mkdir(exist_ok=True)
-    mercado = pd.read_csv(MERCADO)
-    construir(ARCHIVO, {}, mercado)
+    rescatar_manual()
+    datos = (pd.read_csv(MERCADO), leer_balances(), leer_detalle(EMISIONES, ["fecha", "vencimiento"]), leer_detalle(CREDITOS, ["inicio", "vencimiento"]))
+    construir(ARCHIVO, {}, *datos)
     valores = calcular(ARCHIVO)
-    construir(ARCHIVO, valores, mercado)
+    construir(ARCHIVO, valores, *datos)
     print(f"{ARCHIVO.name}: {len(valores)} celdas calculadas")
 
 

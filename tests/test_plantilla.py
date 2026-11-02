@@ -7,7 +7,7 @@ import pytest
 from empresas import plantilla as p
 
 # Empresa inventada que cuadra: sólo prueba las fórmulas, no es un dato real.
-EJEMPLO = {"ventas": 1000, "costo": 600, "comercial": 50, "admin": 40, "explor": 10, "otros_op": 5, "deterioro": 5, "amort": 100,
+EJEMPLO = {"ventas": 1000, "costo": 600, "comercial": 50, "admin": 40, "explor": 10, "otros_op": 5, "deterioro": 5, "no_rec": 0, "amort": 100,
            "asociadas": 10, "ing_fin": 20, "gasto_int": 50, "otros_fin": -10, "impuesto": 60, "neto_inf": 210,
            "caja": 100, "inv_cp": 50, "creditos": 150, "inventarios": 80, "otros_ac": 20, "ppe": 1200, "intang": 100, "inv_asoc": 150, "otros_anc": 50,
            "activo_inf": 1900, "deuda_cp": 100, "arr_cp": 10, "proveedores": 120, "otros_pc": 70, "deuda_lp": 500, "arr_lp": 40, "otros_pnc": 160,
@@ -125,6 +125,47 @@ def test_credito_calcula_plazo_y_peso_en_la_deuda(calculado):
     v, _ = calculado
     assert v[("CRÉDITOS", "M5")] == pytest.approx(2.0, abs=0.01)
     assert v[("CRÉDITOS", "N5")] == pytest.approx(65 / 650)
+
+
+def test_el_ebitda_excluye_lo_no_recurrente_pero_el_resultado_lo_conserva(tmp_path):
+    vacio = tmp_path / "v.xlsx"
+    p.construir(vacio, {}, MERCADO, {("Vista", 2025, clave): float(valor) for clave, valor in {**EJEMPLO, "no_rec": 50}.items()})
+    v = p.calcular(vacio)
+    assert v[("VISTA", f"F{p.FILAS['ebitda']}")] == 355
+    assert v[("VISTA", f"F{p.FILAS['ebit']}")] == 300
+
+
+def test_vista_cierra_contra_sus_estados_contables():
+    wb = openpyxl.load_workbook(p.ARCHIVO, data_only=True)
+    h = wb["Vista"]
+    assert [h[f"{c}{p.FILAS['estado']}"].value for c in "DEF"] == ["OK"] * 3
+    informado = {"D": (631.487, 396.955), "E": (625.390, 477.521), "F": (1250.830, 719.063)}
+    for col, (ebit, neto) in informado.items():
+        assert h[f"{col}{p.FILAS['ebit']}"].value == pytest.approx(ebit, abs=0.002)
+        assert h[f"{col}{p.FILAS['neto']}"].value == pytest.approx(neto, abs=0.002)
+    assert h[f"F{p.FILAS['ebitda']}"].value == pytest.approx(1537.455, abs=0.002)
+
+
+def test_el_detalle_de_vista_suma_el_total_de_deuda():
+    e = pd.read_csv(p.EMISIONES, encoding="utf-8")
+    c = pd.read_csv(p.CREDITOS, encoding="utf-8")
+    assert e[e.empresa == "Vista"].saldo_2025.sum() == pytest.approx(2440.344, abs=0.002)
+    assert c[c.empresa == "Vista"].saldo.sum() == pytest.approx(713.733, abs=0.002)
+
+
+def test_el_rescate_guarda_lo_cargado_a_mano(tmp_path, monkeypatch):
+    archivo, balances = tmp_path / "a.xlsx", tmp_path / "b.csv"
+    pd.DataFrame([("Vista", 2025, "ventas", 7)], columns=["empresa", "anio", "clave", "valor"]).to_csv(balances, index=False)
+    p.construir(archivo, {}, MERCADO)
+    wb = openpyxl.load_workbook(archivo)
+    wb["Pampa"][f"F{p.FILAS['ventas']}"] = 123
+    wb.save(archivo)
+    monkeypatch.setattr(p, "ARCHIVO", archivo)
+    monkeypatch.setattr(p, "BALANCES", balances)
+    p.rescatar_manual()
+    d = p.leer_balances()
+    assert d[("Pampa", 2025, "ventas")] == 123
+    assert d[("Vista", 2025, "ventas")] == 7
 
 
 def test_un_descuadre_se_marca(tmp_path):
