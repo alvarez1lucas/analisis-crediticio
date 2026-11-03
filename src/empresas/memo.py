@@ -156,9 +156,36 @@ capex igual a la depreciación. Peor año de cada indicador:
 """
 
 
+def exportar(d: dict) -> None:
+    """Rating y proyección a outputs/, para el tablero: las mismas cifras que el memo."""
+    import pandas as pd
+
+    salida = p.ROOT / "outputs"
+    pd.DataFrame({"empresa": p.EMPRESAS, "orden": range(1, len(p.EMPRESAS) + 1)}).to_csv(salida / "empresas.csv", index=False, encoding="utf-8")
+    filas = []
+    for k, e in enumerate(p.EMPRESAS):
+        x, r = d[e], d[e]["ratio"]
+        filas.append(dict(empresa=e, orden=k + 1, rating_2025=x["nota"], rating_estres=x["nota_estres"], puntaje_2025=x["puntaje"], puntaje_estres=x["puntaje_estres"],
+                          deuda_neta_ebitda=r["Deuda neta / EBITDA"], ebitda_intereses=r["EBITDA / intereses"], liquidez_corriente=r["Liquidez corriente"],
+                          on_deuda=r["ON / deuda financiera"], peor_apalancamiento_estres=max(x["estres"]["apal"]), peor_cobertura_estres=min(x["estres"]["cob"]),
+                          peor_servicio_estres=min(x["estres"]["dscr"]), ebitda_puede_caer=d["covenants"]["margen"][e]))
+    pd.DataFrame(filas).to_csv(salida / "rating.csv", index=False, encoding="utf-8")
+    proy = []
+    reales = {"deuda_neta_ebitda": "Deuda neta / EBITDA", "cobertura_servicio": "Cobertura de servicio de deuda"}
+    for e in p.EMPRESAS:
+        for escenario, clave in (("Base", "base"), ("Estrés", "estres")):
+            for indicador, ratio in reales.items():
+                proy.append(dict(empresa=e, escenario=escenario, anio=p.ANIOS[-1], indicador=indicador, valor=d[e]["ratio"][ratio]))
+                serie = d[e][clave]["apal" if indicador == "deuda_neta_ebitda" else "dscr"]
+                proy += [dict(empresa=e, escenario=escenario, anio=a, indicador=indicador, valor=v) for a, v in zip(p.PROYECCION, serie)]
+    pd.DataFrame(proy).to_csv(salida / "proyeccion.csv", index=False, encoding="utf-8")
+
+
 def main() -> None:
-    SALIDA.write_text(escribir(leer()), encoding="utf-8", newline="\n")
-    print(f"{SALIDA.name} escrito")
+    d = leer()
+    SALIDA.write_text(escribir(d), encoding="utf-8", newline="\n")
+    exportar(d)
+    print(f"{SALIDA.name} escrito; rating y proyección exportados a outputs/")
 
 
 if __name__ == "__main__":

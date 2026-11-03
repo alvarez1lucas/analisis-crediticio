@@ -1,0 +1,75 @@
+table Medidas
+	lineageTag: e6fcf64f-059f-54fa-9ce1-138a3b8ca8ed
+
+	measure 'Margen EBITDA' = CALCULATE(SUM(indicadores[valor]), indicadores[indicador] = "margen_ebitda")
+		formatString: 0.0%
+		lineageTag: fc4dd830-c1e1-5116-8e60-b7ff89eb6b63
+
+	measure 'Deuda neta / EBITDA' = CALCULATE(SUM(indicadores[valor]), indicadores[indicador] = "deuda_neta_ebitda")
+		formatString: #,0.0x
+		lineageTag: e49b5a13-ddd9-5038-ad67-6c72359dad27
+
+	measure 'EBITDA / intereses' = CALCULATE(SUM(indicadores[valor]), indicadores[indicador] = "ebitda_intereses")
+		formatString: #,0.0x
+		lineageTag: d4210e6e-7c07-5e58-a435-c529afb63f01
+
+	measure 'Liquidez corriente' = CALCULATE(SUM(indicadores[valor]), indicadores[indicador] = "liquidez_corriente")
+		formatString: #,0.0x
+		lineageTag: 10d600a5-b7a7-5609-a2a4-e6cdf57b2b45
+
+	measure 'Flujo libre / deuda' = CALCULATE(SUM(indicadores[valor]), indicadores[indicador] = "flujo_libre_deuda")
+		formatString: 0.0%
+		lineageTag: 35d5b1ef-5924-585b-9e8c-31d2dcb625be
+
+	measure 'ON / deuda' = CALCULATE(SUM(indicadores[valor]), indicadores[indicador] = "on_deuda")
+		formatString: 0.0%
+		lineageTag: e4b90508-d6fc-5131-9601-05bbf6a96eb7
+
+	measure 'Deuda en dólares' = CALCULATE(SUM(indicadores[valor]), indicadores[indicador] = "dolares_deuda")
+		formatString: 0.0%
+		lineageTag: ab8bb214-49c6-5ea3-941c-ee5d72fec048
+
+	measure 'Capex / ventas' = CALCULATE(SUM(indicadores[valor]), indicadores[indicador] = "capex_ventas")
+		formatString: 0.0%
+		lineageTag: 8678172d-fd9b-59b7-adf5-0f2220feb5e2
+
+	measure 'Monto emitido' = SUM(emisiones[monto])
+		formatString: #,0
+		lineageTag: 41813379-a884-57a8-8f79-2a8d724c2cd0
+
+	measure 'Tasa media ponderada' = DIVIDE(SUMX(emisiones, emisiones[monto] * emisiones[tasa]), SUM(emisiones[monto]))
+		formatString: 0.00%
+		lineageTag: 501fab65-8144-5c32-aff4-75df0fda1c59
+
+	measure 'Riesgo país' = AVERAGE(mercado[riesgo_pais])
+		formatString: #,0
+		lineageTag: 38094c29-8e11-5100-985c-f2db6e26987f
+
+	measure 'Riesgo país al emitir' = AVERAGE(emisiones[riesgo_pais])
+		formatString: #,0
+		lineageTag: 5093f00d-15ce-5815-88f4-c6a1a936c474
+
+	measure 'Proyección deuda neta / EBITDA' = CALCULATE(SUM(proyeccion[valor]), proyeccion[indicador] = "deuda_neta_ebitda")
+		formatString: #,0.0x
+		lineageTag: 45a4559b-6b06-5154-820f-c7d22c7d0fdf
+
+	measure 'Proyección cobertura de servicio' = CALCULATE(SUM(proyeccion[valor]), proyeccion[indicador] = "cobertura_servicio")
+		formatString: #,0.0x
+		lineageTag: 1ba3f760-2ee7-5cfd-bd0f-24b56e2c4e75
+
+	column _
+		dataType: string
+		isHidden
+		lineageTag: 6f30bede-f39b-5db6-8547-941c97774d22
+		summarizeBy: none
+		sourceColumn: _
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Medidas = m
+		mode: import
+		source =
+				let
+				    Resultado = #table(type table [_ = text], {})
+				in
+				    Resultado

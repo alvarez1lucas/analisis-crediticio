@@ -7,3 +7,7 @@ __pycache__/
 
 # Sitio generado (se construye y publica en GitHub Actions)
 /site/
+
+# Caché local de Power BI
+/powerbi/*/.pbi/cache.abf
+/powerbi/*/.pbi/localSettings.json

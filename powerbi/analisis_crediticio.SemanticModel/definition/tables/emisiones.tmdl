@@ -1,0 +1,157 @@
+table emisiones
+	lineageTag: 6d728532-7bf0-55e8-862e-74335faecfe3
+
+	column empresa
+		dataType: string
+		lineageTag: 6b3094a0-18fe-5ced-ad9d-d4f51a045df4
+		summarizeBy: none
+		sourceColumn: empresa
+
+		annotation SummarizationSetBy = Automatic
+
+	column clase
+		dataType: string
+		lineageTag: 8ea5428d-4d11-5441-96a3-bf82563cab7d
+		summarizeBy: none
+		sourceColumn: clase
+
+		annotation SummarizationSetBy = Automatic
+
+	column instrumento
+		dataType: string
+		lineageTag: 562ba84b-784b-5574-af4b-f7dde5fe8ca4
+		summarizeBy: none
+		sourceColumn: instrumento
+
+		annotation SummarizationSetBy = Automatic
+
+	column monto
+		dataType: double
+		formatString: #,0
+		lineageTag: bf50629a-d2f4-5761-beb6-ca5cbc9579ff
+		summarizeBy: none
+		sourceColumn: monto
+
+		annotation SummarizationSetBy = Automatic
+
+	column cupon
+		dataType: double
+		formatString: 0.00%
+		lineageTag: 12d08340-5e87-56e7-b393-3f170d8ed95d
+		summarizeBy: none
+		sourceColumn: cupon
+
+		annotation SummarizationSetBy = Automatic
+
+	column rendimiento
+		dataType: double
+		lineageTag: 174ecd44-a234-5013-a2ec-24371ee580d2
+		summarizeBy: none
+		sourceColumn: rendimiento
+
+		annotation SummarizationSetBy = Automatic
+
+	column fecha
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: fa2aed55-066e-5333-80da-cb533e8d5b03
+		summarizeBy: none
+		sourceColumn: fecha
+
+		annotation SummarizationSetBy = Automatic
+
+	column vencimiento
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: 6ef02d65-4186-58dc-aa28-21a624b9930c
+		summarizeBy: none
+		sourceColumn: vencimiento
+
+		annotation SummarizationSetBy = Automatic
+
+	column plazo
+		dataType: double
+		formatString: 0.0
+		lineageTag: dde9888e-307f-59e6-ae61-14e062fe340d
+		summarizeBy: none
+		sourceColumn: plazo
+
+		annotation SummarizationSetBy = Automatic
+
+	column tasa
+		dataType: double
+		formatString: 0.00%
+		lineageTag: f5632b6d-73c7-551e-9c21-4cb69fa1a311
+		summarizeBy: none
+		sourceColumn: tasa
+
+		annotation SummarizationSetBy = Automatic
+
+	column anio
+		dataType: int64
+		lineageTag: edfea356-31b9-5107-9fa3-5df08a5cf47b
+		summarizeBy: none
+		sourceColumn: anio
+
+		annotation SummarizationSetBy = Automatic
+
+	column riesgo_pais
+		dataType: double
+		formatString: #,0
+		lineageTag: 29e4570b-6a90-594b-9ab1-d0d86cc61094
+		summarizeBy: none
+		sourceColumn: riesgo_pais
+
+		annotation SummarizationSetBy = Automatic
+
+	column tesoro
+		dataType: double
+		lineageTag: 3b0d2950-858b-5318-9c73-9a909398739e
+		summarizeBy: none
+		sourceColumn: tesoro
+
+		annotation SummarizationSetBy = Automatic
+
+	column credito_sistema
+		dataType: double
+		lineageTag: 5c62657c-006a-5dd5-9545-a2581bb58a51
+		summarizeBy: none
+		sourceColumn: credito_sistema
+
+		annotation SummarizationSetBy = Automatic
+
+	column spread_pb
+		dataType: double
+		formatString: #,0
+		lineageTag: 274328e8-58e9-540e-802b-18b0a8458708
+		summarizeBy: none
+		sourceColumn: spread_pb
+
+		annotation SummarizationSetBy = Automatic
+
+	column prima_riesgo_pais_pb
+		dataType: double
+		formatString: #,0
+		lineageTag: 98f5d095-5965-5c69-960b-9247f5597a44
+		summarizeBy: none
+		sourceColumn: prima_riesgo_pais_pb
+
+		annotation SummarizationSetBy = Automatic
+
+	column on_menos_credito_pb
+		dataType: double
+		lineageTag: 59b90e76-4303-554e-a278-78e1cd1cfb19
+		summarizeBy: none
+		sourceColumn: on_menos_credito_pb
+
+		annotation SummarizationSetBy = Automatic
+
+	partition emisiones = m
+		mode: import
+		source =
+				let
+				    Origen = Csv.Document(File.Contents(RutaDatos & "\outputs\emisiones.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Encabezados = Table.PromoteHeaders(Origen, [PromoteAllScalars = true]),
+				    Resultado = Table.TransformColumnTypes(Encabezados, {{"empresa", type text}, {"clase", type text}, {"instrumento", type text}, {"monto", type number}, {"cupon", type number}, {"rendimiento", type number}, {"fecha", type date}, {"vencimiento", type date}, {"plazo", type number}, {"tasa", type number}, {"anio", Int64.Type}, {"riesgo_pais", type number}, {"tesoro", type number}, {"credito_sistema", type number}, {"spread_pb", type number}, {"prima_riesgo_pais_pb", type number}, {"on_menos_credito_pb", type number}}, "en-US")
+				in
+				    Resultado

@@ -1,0 +1,93 @@
+table mercado
+	lineageTag: b324cc9b-9dec-53b1-a50a-7765def38400
+
+	column fecha
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: 743c8266-257c-558c-bbab-169400654be3
+		summarizeBy: none
+		sourceColumn: fecha
+
+		annotation SummarizationSetBy = Automatic
+
+	column riesgo_pais
+		dataType: double
+		lineageTag: c3ad5aaa-a890-5151-aa46-4edd04565b83
+		summarizeBy: none
+		sourceColumn: riesgo_pais
+
+		annotation SummarizationSetBy = Automatic
+
+	column ust_1
+		dataType: double
+		lineageTag: c173fe95-25c7-52cc-bfd2-a5b1eec6fe92
+		summarizeBy: none
+		sourceColumn: ust_1
+
+		annotation SummarizationSetBy = Automatic
+
+	column ust_2
+		dataType: double
+		lineageTag: 86a17a09-b8f9-5598-982a-5af9279c523f
+		summarizeBy: none
+		sourceColumn: ust_2
+
+		annotation SummarizationSetBy = Automatic
+
+	column ust_3
+		dataType: double
+		lineageTag: 9f9313bb-2bd8-5baf-b2ae-4205f2e319b2
+		summarizeBy: none
+		sourceColumn: ust_3
+
+		annotation SummarizationSetBy = Automatic
+
+	column ust_5
+		dataType: double
+		lineageTag: a67ef4ab-5341-5ed1-b504-8ba0822d3ee8
+		summarizeBy: none
+		sourceColumn: ust_5
+
+		annotation SummarizationSetBy = Automatic
+
+	column ust_7
+		dataType: double
+		lineageTag: a55fae05-0d69-56d4-97ca-b3b655b8b468
+		summarizeBy: none
+		sourceColumn: ust_7
+
+		annotation SummarizationSetBy = Automatic
+
+	column ust_10
+		dataType: double
+		lineageTag: 70c2e688-7f17-539d-a2ef-4f8d8bfb8ca7
+		summarizeBy: none
+		sourceColumn: ust_10
+
+		annotation SummarizationSetBy = Automatic
+
+	column badlar
+		dataType: double
+		lineageTag: a0c0c911-985d-54ad-b6aa-e57ae665dcb5
+		summarizeBy: none
+		sourceColumn: badlar
+
+		annotation SummarizationSetBy = Automatic
+
+	column adelantos
+		dataType: double
+		lineageTag: 38aba523-c16f-5e0f-a568-00a47fb8d7d7
+		summarizeBy: none
+		sourceColumn: adelantos
+
+		annotation SummarizationSetBy = Automatic
+
+	partition mercado = m
+		mode: import
+		source =
+				let
+				    Origen = Csv.Document(File.Contents(RutaDatos & "\data\mercado.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Encabezados = Table.PromoteHeaders(Origen, [PromoteAllScalars = true]),
+				    Resultado = Table.TransformColumnTypes(Encabezados, {{"fecha", type date}, {"riesgo_pais", type number}, {"ust_1", type number}, {"ust_2", type number}, {"ust_3", type number}, {"ust_5", type number}, {"ust_7", type number}, {"ust_10", type number}, {"badlar", type number}, {"adelantos", type number}}, "en-US")
+				in
+				    Resultado

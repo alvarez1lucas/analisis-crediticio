@@ -1,0 +1,332 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "name": "resumen_01",
+  "position": {
+    "x": 24,
+    "y": 86,
+    "z": 100,
+    "height": 190,
+    "width": 1232,
+    "tabOrder": 100
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "drillFilterOtherVisuals": true,
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "rating"
+                    }
+                  },
+                  "Property": "empresa"
+                }
+              },
+              "queryRef": "rating.empresa",
+              "nativeQueryRef": "rating_empresa",
+              "displayName": "Empresa"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "rating"
+                    }
+                  },
+                  "Property": "rating_2025"
+                }
+              },
+              "queryRef": "rating.rating_2025",
+              "nativeQueryRef": "rating_rating_2025",
+              "displayName": "Rating 2025"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "rating"
+                    }
+                  },
+                  "Property": "rating_estres"
+                }
+              },
+              "queryRef": "rating.rating_estres",
+              "nativeQueryRef": "rating_rating_estres",
+              "displayName": "Rating bajo estrés"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "rating"
+                    }
+                  },
+                  "Property": "deuda_neta_ebitda"
+                }
+              },
+              "queryRef": "rating.deuda_neta_ebitda",
+              "nativeQueryRef": "rating_deuda_neta_ebitda",
+              "displayName": "Deuda neta / EBITDA"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "rating"
+                    }
+                  },
+                  "Property": "ebitda_intereses"
+                }
+              },
+              "queryRef": "rating.ebitda_intereses",
+              "nativeQueryRef": "rating_ebitda_intereses",
+              "displayName": "EBITDA / intereses"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "rating"
+                    }
+                  },
+                  "Property": "liquidez_corriente"
+                }
+              },
+              "queryRef": "rating.liquidez_corriente",
+              "nativeQueryRef": "rating_liquidez_corriente",
+              "displayName": "Liquidez"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "rating"
+                    }
+                  },
+                  "Property": "on_deuda"
+                }
+              },
+              "queryRef": "rating.on_deuda",
+              "nativeQueryRef": "rating_on_deuda",
+              "displayName": "ON / deuda"
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "total": [
+        {
+          "properties": {
+            "totals": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "columnHeaders": [
+        {
+          "properties": {
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "13.0D"
+                }
+              }
+            },
+            "wordWrap": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "values": [
+        {
+          "properties": {
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "13.0D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "grid": [
+        {
+          "properties": {
+            "rowPadding": {
+              "expr": {
+                "Literal": {
+                  "Value": "8L"
+                }
+              }
+            },
+            "textSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "13.0D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "columnWidth": [
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "169.0D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "rating.empresa"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "169.0D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "rating.rating_2025"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "169.0D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "rating.rating_estres"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "169.0D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "rating.deuda_neta_ebitda"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "169.0D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "rating.ebitda_intereses"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "169.0D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "rating.liquidez_corriente"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "169.0D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "rating.on_deuda"
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Rating interno y ratios de 2025'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

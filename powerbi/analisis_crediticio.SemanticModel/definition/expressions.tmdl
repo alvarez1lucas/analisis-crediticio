@@ -1,0 +1,4 @@
+expression RutaDatos = "F:\analisis-crediticio" meta [IsParameterQuery = true, Type = "Text", IsParameterQueryRequired = true]
+	lineageTag: 10e73090-1181-54a3-a181-27c37d7d78a1
+
+	annotation PBI_ResultType = Text

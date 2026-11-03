@@ -1,0 +1,379 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "name": "financiamiento_05",
+  "position": {
+    "x": 536,
+    "y": 396,
+    "z": 500,
+    "height": 290,
+    "width": 720,
+    "tabOrder": 500
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "drillFilterOtherVisuals": true,
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "emisiones"
+                    }
+                  },
+                  "Property": "empresa"
+                }
+              },
+              "queryRef": "emisiones.empresa",
+              "nativeQueryRef": "emisiones_empresa",
+              "displayName": "Empresa"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "emisiones"
+                    }
+                  },
+                  "Property": "clase"
+                }
+              },
+              "queryRef": "emisiones.clase",
+              "nativeQueryRef": "emisiones_clase",
+              "displayName": "Clase"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "emisiones"
+                    }
+                  },
+                  "Property": "fecha"
+                }
+              },
+              "queryRef": "emisiones.fecha",
+              "nativeQueryRef": "emisiones_fecha",
+              "displayName": "Fecha"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "emisiones"
+                    }
+                  },
+                  "Property": "instrumento"
+                }
+              },
+              "queryRef": "emisiones.instrumento",
+              "nativeQueryRef": "emisiones_instrumento",
+              "displayName": "Instrumento"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "emisiones"
+                    }
+                  },
+                  "Property": "monto"
+                }
+              },
+              "queryRef": "emisiones.monto",
+              "nativeQueryRef": "emisiones_monto",
+              "displayName": "US$ M"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "emisiones"
+                    }
+                  },
+                  "Property": "tasa"
+                }
+              },
+              "queryRef": "emisiones.tasa",
+              "nativeQueryRef": "emisiones_tasa",
+              "displayName": "Tasa"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "emisiones"
+                    }
+                  },
+                  "Property": "riesgo_pais"
+                }
+              },
+              "queryRef": "emisiones.riesgo_pais",
+              "nativeQueryRef": "emisiones_riesgo_pais",
+              "displayName": "Riesgo país"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "emisiones"
+                    }
+                  },
+                  "Property": "prima_riesgo_pais_pb"
+                }
+              },
+              "queryRef": "emisiones.prima_riesgo_pais_pb",
+              "nativeQueryRef": "emisiones_prima_riesgo_pais_pb",
+              "displayName": "Prima vs. riesgo país (pb)"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "emisiones"
+                  }
+                },
+                "Property": "fecha"
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": false
+      }
+    },
+    "objects": {
+      "total": [
+        {
+          "properties": {
+            "totals": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "columnHeaders": [
+        {
+          "properties": {
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "10.0D"
+                }
+              }
+            },
+            "wordWrap": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "values": [
+        {
+          "properties": {
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "10.0D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "grid": [
+        {
+          "properties": {
+            "rowPadding": {
+              "expr": {
+                "Literal": {
+                  "Value": "2L"
+                }
+              }
+            },
+            "textSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "10.0D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "columnWidth": [
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "70.0D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "emisiones.empresa"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "86.0D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "emisiones.clase"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "86.0D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "emisiones.fecha"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "86.0D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "emisiones.instrumento"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "86.0D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "emisiones.monto"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "86.0D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "emisiones.tasa"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "86.0D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "emisiones.riesgo_pais"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "86.0D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "emisiones.prima_riesgo_pais_pb"
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Detalle de emisiones'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
