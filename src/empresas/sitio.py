@@ -273,7 +273,7 @@ def portada(L: str, base: dict) -> str:
     ratios = [("Deuda neta / EBITDA", x_, "Net debt / EBITDA"), ("EBITDA / intereses", x_, "EBITDA / interest"), ("Margen EBITDA", pc, "EBITDA margin"),
               ("Liquidez corriente", x_, "Current ratio"), ("ON / deuda financiera", pc, "Bonds / debt"), ("Altman Z'' mercados emergentes", x_, "Altman Z''")]
     filas_ratios = [[x] + [f(d[x]["ratio"][r]) for r, f, _ in ratios] + [d[x]["nota"]] for x in p.EMPRESAS]
-    enc_ratios = [str(p.ANIOS[-1])] + [es(L, en, r) for r, _, en in ratios] + [es(L, "Internal rating", "Rating interno")]
+    enc_ratios = [str(p.ANIOS[-1])] + [es(L, en, en if "Altman" in r else r) for r, _, en in ratios] + [es(L, "Internal rating", "Rating interno")]
 
     dup = ind[ind.anio == p.ANIOS[-1]].pivot(index="empresa", columns="indicador", values="valor").reindex(p.EMPRESAS)
     filas_dupont = [[x, pc(dup.loc[x, "roe"], 1), pc(dup.loc[x, "margen_neto"], 1), n(dup.loc[x, "rotacion_activos"], 2), x_(dup.loc[x, "activo_patrimonio"])] for x in p.EMPRESAS]
