@@ -218,6 +218,36 @@ def test_las_tasas_no_cruzan_dolares_con_pesos():
     assert t.pf_usd.median() < 5 < t.pf_ars.median()
 
 
+def test_proyeccion_repite_la_mecanica_a_mano():
+    wb = openpyxl.load_workbook(p.ARCHIVO, data_only=True)
+    pr, h = wb["Proyección"], wb["Pampa"]
+    ventas, ebitda, deuda, amort = (h[f"D{p.FILAS[k]}"].value for k in ("ventas", "ebitda", "deuda", "amort"))
+    caja = h[f"D{p.FILAS['caja']}"].value + h[f"D{p.FILAS['inv_cp']}"].value
+    conv = sum(h[f"{c}{p.FILAS['cfo']}"].value for c in "BCD") / sum(h[f"{c}{p.FILAS['ebitda']}"].value for c in "BCD")
+    costo = pr["B16"].value
+    s = 20  # Pampa, primer bloque
+    v_ventas = ventas * (1 - 0.20)
+    v_ebitda = v_ventas * (ebitda / ventas - 0.05)
+    interes = deuda * costo
+    necesidad = amort + interes - v_ebitda * conv
+    nueva_deuda = deuda + necesidad
+    assert pr[f"G{s + 2}"].value == pytest.approx(v_ventas)
+    assert pr[f"G{s + 3}"].value == pytest.approx(v_ebitda)
+    assert pr[f"G{s + 10}"].value == pytest.approx(nueva_deuda)
+    assert pr[f"G{s + 15}"].value == pytest.approx((nueva_deuda - caja) / v_ebitda)
+
+
+def test_rating_y_covenants_dan_resultado_para_las_tres():
+    wb = openpyxl.load_workbook(p.ARCHIVO, data_only=True)
+    rt, cv = wb["Rating"], wb["Covenants"]
+    fila_nota = 7 + len(p.FACTORES)
+    notas = [rt[f"{c}{fila_nota}"].value for c in "HIJKLM"]
+    assert all(n in ("A", "BBB", "BB", "B", "CCC") for n in notas)
+    assert rt[f"B{fila_nota - 1}"].value == pytest.approx(1)
+    estados = [cv[f"G{f}"].value for f in range(8, 22) if cv[f"G{f}"].value]
+    assert len(estados) == 12 and set(estados) <= {"Cumple", "Incumple"}
+
+
 def test_un_descuadre_se_marca(tmp_path):
     vacio = tmp_path / "v.xlsx"
     p.construir(vacio, {}, MERCADO)

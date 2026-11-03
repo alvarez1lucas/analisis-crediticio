@@ -33,6 +33,19 @@ MONEDAS = ["Dólar", "Dólar linked", "Pesos"]
 TASAS = ["Fija", "Variable"]
 REFERENCIAS = ["SOFR", "BADLAR", "TAMAR", "Otra", "Ninguna"]
 FILAS_CREDITOS = 100
+# Proyección. SUPUESTOS: vida media ponderada por saldo al 31-12-2025 (Emisiones, Créditos y nota 12.5.2 de Pampa) y rendimiento
+# de la última ON larga en dólar duro de cada empresa (Pampa Clase 26, YPF Clase XXXIX, Vista ON XXIX).
+VIDA_MEDIA = {"Pampa": 7.7, "YPF": 4.8, "Vista": 5.6}
+TASA_NUEVA = {"Pampa": 0.08125, "YPF": 0.0875, "Vista": 0.085}
+PROYECCION = [2026, 2027, 2028]
+# Rating interno: (factor, clave de ratio o línea, peso, límites, mayor es mejor)
+FACTORES = [("Deuda neta / EBITDA", "Deuda neta / EBITDA", 0.25, (1, 2, 3, 4), False),
+            ("EBITDA / intereses", "EBITDA / intereses", 0.20, (1.5, 3, 5, 8), True),
+            ("Liquidez corriente", "Liquidez corriente", 0.15, (0.75, 1, 1.5, 2), True),
+            ("Flujo libre / deuda", "Flujo libre / deuda", 0.15, (-0.1, 0, 0.05, 0.15), True),
+            ("Margen EBITDA", "Margen EBITDA", 0.10, (0.1, 0.2, 0.3, 0.4), True),
+            ("Escala: EBITDA (US$ M)", "ebitda", 0.15, (200, 500, 1000, 3000), True)]
+ESCALA = [(4.25, "A"), (3.5, "BBB"), (2.75, "BB"), (2.0, "B")]  # puntaje mínimo de cada nota; debajo, CCC
 FILAS_EMISIONES = 150
 EMPRESAS = ["Pampa", "YPF", "Vista"]
 ANIOS = [2023, 2024, 2025]  # los tres años que los 20-F 2025 informan en dólares y auditados
@@ -395,6 +408,174 @@ def construir(archivo: Path, valores: dict, mercado: pd.DataFrame, balances: dic
                 cargado = f"OR({ref(e, 'ventas', actual)}=0,{ref(e, 'ventas', anterior)}=0)"
                 extra = dict(font_color=VERDE) if calculo else {}
                 formula(u, f"{col}{f}", f'IF({cargado},"n.d.",{cuerpo})', num_format=MIL, align="right", **extra)
+
+    # --- Rating
+    fp = lambda ws, celda, cuerpo, **k: formula(ws, celda, f'IFERROR({cuerpo},"n.d.")', **k)  # sin datos, sin errores
+    nombres = [x[0] for x in RATIOS]
+    real = lambda e, nombre: f"Ratios!${COLUMNAS[-1]}${inicio[e] + 2 + nombres.index(nombre)}"
+    rt = nueva_hoja("Rating", "Rating interno", "Puntaje de 1 a 5 por factor con los datos de 2025, y el mismo puntaje con el peor año del escenario de estrés.", "#1BAF7A")
+    rt.set_column("A:A", 30)
+    rt.set_column("B:G", 10)
+    rt.set_column("H:N", 11)
+    rt.set_row(4, 30)
+    rt.write_row(4, 0, ["Factor", "Peso", "Límite 1", "Límite 2", "Límite 3", "Límite 4", "Mejor si"] + [f"{e} 2025" for e in EMPRESAS] + [f"{e} estrés" for e in EMPRESAS], fmt(**{**encabezado, "text_wrap": True}))
+    fila_factor = {}
+    for i, (texto, _, peso, limites, mayor) in enumerate(FACTORES):
+        f = 6 + i
+        fila_factor[texto] = f
+        rt.write(f"A{f}", texto, fmt())
+        rt.write(f"B{f}", peso, fmt(num_format="0%", font_color=AZUL, bg_color=RESALTE, border=1, border_color=LINEA))
+        for j, x in enumerate(limites):
+            rt.write(f"{'CDEF'[j]}{f}", x, fmt(font_color=AZUL, bg_color=RESALTE, border=1, border_color=LINEA, num_format="0.00" if abs(x) < 10 else "#,##0"))
+        rt.write(f"G{f}", "mayor" if mayor else "menor", fmt(align="center", font_color=GRIS))
+    fin_f = 5 + len(FACTORES)
+    rt.write(f"A{fin_f + 1}", "Puntaje ponderado", fmt(bold=True, top=1))
+    rt.write(f"A{fin_f + 2}", "Rating interno", fmt(bold=True))
+    formula(rt, f"B{fin_f + 1}", f"SUM(B6:B{fin_f})", num_format="0%", bold=True, top=1)
+    rt.write(f"A{fin_f + 4}", "Puntaje por factor: 1 debajo del límite 1, 5 sobre el límite 4 (al revés si es mejor el menor). Texto (n.s., n.d.): 1.", fmt(font_color=GRIS, font_size=8))
+    rt.write(f"A{fin_f + 5}", "Escala interna: A desde 4,25; BBB desde 3,5; BB desde 2,75; B desde 2; debajo, CCC. No es comparable con una calificadora ni aplica techo soberano.", fmt(font_color=GRIS, font_size=8))
+    rt.write(f"A{fin_f + 6}", "Estrés: deuda neta / EBITDA y EBITDA / intereses del peor año proyectado en Proyección. El resto queda como en 2025.", fmt(font_color=GRIS, font_size=8))
+
+    # --- Proyección
+    pr = nueva_hoja("Proyección", "Proyección 2026-2028", "¿Puede pagar si deja de crecer y se le encarece la deuda? Base: ventas y margen de 2025, capex de mantenimiento. Estrés: caen las ventas y sube la tasa.", "#E34948")
+    pr.set_column("A:A", 40)
+    pr.set_column("B:I", 11)
+    supuesto = fmt(font_color=AZUL, bg_color=RESALTE, border=1, border_color=LINEA, num_format="0.0%")
+    pr.write("A4", "Supuestos generales", fmt(bold=True, font_color=ENCABEZADO))
+    for f, texto, valor in ((5, "Crecimiento anual de ventas", 0.0), (6, "Estrés: caída de ventas en 2026", -0.20), (7, "Estrés: baja del margen EBITDA (pp)", 0.05), (8, "Estrés: suba de la tasa de deuda nueva (pp)", 0.04)):
+        pr.write(f"A{f}", texto, fmt())
+        pr.write(f"B{f}", valor, supuesto)
+    pr.write("C6", "Supuesto: un año de precios bajos del petróleo y el gas.", fmt(font_color=GRIS, font_size=8))
+    pr.write("C8", "Supuesto: un salto de riesgo país como el de 2023 encarece toda la deuda que se renueva.", fmt(font_color=GRIS, font_size=8))
+    pr.write("A10", "Supuestos por empresa", fmt(bold=True, font_color=ENCABEZADO))
+    pr.write_row(10, 0, ["Supuesto"] + EMPRESAS, fmt(**encabezado))
+    fila_sup = {"conv": 12, "vida": 13, "tasa": 14, "margen": 15, "costo": 16}
+    textos_sup = {"conv": "Flujo operativo / EBITDA (promedio 2023-2025)", "vida": "Vida media de la deuda (años)", "tasa": "Tasa de deuda nueva (base)",
+                  "margen": "Margen EBITDA 2025", "costo": "Costo medio de la deuda 2025"}
+    for k, f in fila_sup.items():
+        pr.write(f"A{f}", textos_sup[k], fmt())
+    ultimo = COLUMNAS[-1]
+    for j, e in enumerate(EMPRESAS):
+        col = "BCD"[j]
+        conv = "+".join(ref(e, "cfo", c) for c in COLUMNAS) + ")/(" + "+".join(ref(e, "ebitda", c) for c in COLUMNAS)
+        fp(pr, f"{col}12", f"({conv})", num_format="0.00", font_color=VERDE)
+        pr.write(f"{col}13", VIDA_MEDIA[e], fmt(font_color=AZUL, bg_color=RESALTE, border=1, border_color=LINEA, num_format="0.0"))
+        pr.write(f"{col}14", TASA_NUEVA[e], supuesto)
+        fp(pr, f"{col}15", f"{ref(e, 'ebitda', ultimo)}/{ref(e, 'ventas', ultimo)}", num_format="0.0%", font_color=VERDE)
+        fp(pr, f"{col}16", real(e, "Costo medio de la deuda"), num_format="0.0%", font_color=VERDE)
+    pr.write("A17", "Vida media: ponderada por saldo al 31-12-2025. Tasa nueva: rendimiento de la última ON larga en dólar duro.", fmt(font_color=GRIS, font_size=8))
+    lineas = ["Ventas", "EBITDA", "Flujo operativo antes de intereses", "Capex", "Intereses", "Dividendos", "Vencimientos", "Necesidad de fondos", "Deuda",
+              "Deuda tomada a tasa nueva", "Tasa de deuda nueva", "Costo medio de la deuda", "Caja e inversiones", "Deuda neta / EBITDA", "EBITDA / intereses", "Cobertura de servicio de deuda"]
+    L = {t: i for i, t in enumerate(lineas)}
+    alto_p = len(lineas) + 4
+    salida = {}
+    escenarios = (("Base", "CDE"), ("Estrés", "GHI"))
+    for j, e in enumerate(EMPRESAS):
+        s = 20 + j * alto_p
+        c_e = "BCD"[j]
+        sup = lambda k: f"${c_e}${fila_sup[k]}"
+        fila = lambda t: s + 2 + L[t]
+        pr.write(f"A{s}", e, fmt(bold=True, font_size=12, font_color=ENCABEZADO))
+        pr.write(f"C{s}", "Base", fmt(bold=True, align="center"))
+        pr.write(f"G{s}", "Estrés", fmt(bold=True, align="center"))
+        pr.write_row(s, 0, ["US$ millones", "2025 real"] + PROYECCION + [""] + PROYECCION, fmt(**encabezado))
+        for t in lineas:
+            fuerte = dict(bold=True, top=1, top_color=LINEA) if t in ("Deuda neta / EBITDA",) else {}
+            pr.write(f"A{fila(t)}", t, fmt(**fuerte))
+        r = lambda clave: ref(e, clave, ultimo)
+        reales = {"Ventas": r("ventas"), "EBITDA": r("ebitda"), "Flujo operativo antes de intereses": r("cfo"), "Capex": r("capex"), "Intereses": r("gasto_int"),
+                  "Dividendos": r("dividendos"), "Deuda": r("deuda"), "Deuda tomada a tasa nueva": "0", "Costo medio de la deuda": sup("costo"),
+                  "Caja e inversiones": f"{r('caja')}+{r('inv_cp')}"}
+        for t, x in reales.items():
+            fp(pr, f"B{fila(t)}", x, font_color=VERDE, num_format=P if "Costo" in t else MIL)
+        fp(pr, f"B{fila('Deuda neta / EBITDA')}", f"(B{fila('Deuda')}-B{fila('Caja e inversiones')})/B{fila('EBITDA')}", num_format=X)
+        fp(pr, f"B{fila('EBITDA / intereses')}", f"B{fila('EBITDA')}/B{fila('Intereses')}", num_format=X)
+        for nombre, cols in escenarios:
+            estres = nombre == "Estrés"
+            for i, c in enumerate(cols):
+                a = "B" if i == 0 else cols[i - 1]
+                x = lambda t, col=c: f"{col}{fila(t)}"
+                ant = lambda t: f"{a}{fila(t)}"
+                caida = "+$B$6" if estres and i == 0 else ""
+                v = {"Ventas": f"{ant('Ventas')}*(1+$B$5{caida})",
+                     "EBITDA": f"{x('Ventas')}*({sup('margen')}{'-$B$7' if estres else ''})",
+                     "Flujo operativo antes de intereses": f"{x('EBITDA')}*{sup('conv')}",
+                     "Capex": r("amort"),
+                     "Intereses": f"{ant('Deuda')}*{ant('Costo medio de la deuda')}",
+                     "Dividendos": "0",
+                     "Vencimientos": f"{ant('Deuda')}/{sup('vida')}",
+                     "Necesidad de fondos": f"{x('Capex')}+{x('Intereses')}+{x('Dividendos')}-{x('Flujo operativo antes de intereses')}",
+                     "Deuda": f"MAX(0,{ant('Deuda')}+{x('Necesidad de fondos')})",
+                     "Deuda tomada a tasa nueva": f"MIN({x('Deuda')},{ant('Deuda tomada a tasa nueva')}+{x('Vencimientos')}+MAX(0,{x('Necesidad de fondos')}))",
+                     "Tasa de deuda nueva": f"{sup('tasa')}{'+$B$8' if estres else ''}",
+                     "Costo medio de la deuda": f"IF({x('Deuda')}=0,0,({x('Deuda tomada a tasa nueva')}*{x('Tasa de deuda nueva')}+({x('Deuda')}-{x('Deuda tomada a tasa nueva')})*{sup('costo')})/{x('Deuda')})",
+                     "Caja e inversiones": f"$B{fila('Caja e inversiones')}",
+                     "Deuda neta / EBITDA": f'IF({x("EBITDA")}<=0,"n.s.",({x("Deuda")}-{x("Caja e inversiones")})/{x("EBITDA")})',
+                     "EBITDA / intereses": f'IF({x("Intereses")}<=0,"n.s.",{x("EBITDA")}/{x("Intereses")})',
+                     "Cobertura de servicio de deuda": f"{x('Flujo operativo antes de intereses')}/({x('Intereses')}+{x('Vencimientos')})"}
+                for t, cuerpo in v.items():
+                    formato = P if t in ("Tasa de deuda nueva", "Costo medio de la deuda") else X if t in ("Deuda neta / EBITDA", "EBITDA / intereses", "Cobertura de servicio de deuda") else MIL
+                    fp(pr, x(t), cuerpo, num_format=formato, font_color=VERDE if t == "Capex" else "#0B0B0B", align="right")
+        salida[e] = {t: fila(t) for t in lineas}
+    pr.write(f"A{20 + len(EMPRESAS) * alto_p}", "Mecánica: la necesidad de fondos se cubre con deuda nueva y la caja queda constante. Lo que vence se renueva a la tasa nueva. Sin dividendos.", fmt(font_color=GRIS, font_size=8))
+
+    # Puntajes del rating, ahora que existe la proyección
+    for j, e in enumerate(EMPRESAS):
+        for estres, col in ((False, "HIJ"[j]), (True, "KLM"[j])):
+            celdas_score = []
+            for texto, clave, _, _, mayor in FACTORES:
+                f = fila_factor[texto]
+                if clave == "ebitda":
+                    valor = ref(e, "ebitda", ultimo)
+                elif estres and texto == "Deuda neta / EBITDA":
+                    valor = f"MAX(Proyección!$G${salida[e][texto]}:$I${salida[e][texto]})"
+                elif estres and texto == "EBITDA / intereses":
+                    valor = f"MIN(Proyección!$G${salida[e][texto]}:$I${salida[e][texto]})"
+                else:
+                    valor = real(e, clave)
+                formula(rt, f"{col}{f}", valor, font_color=VERDE, num_format="0.00", align="right")
+                v = f"{col}{f}"
+                if mayor:
+                    puntos = f"1+({v}>=$C{f})+({v}>=$D{f})+({v}>=$E{f})+({v}>=$F{f})"
+                else:
+                    puntos = f"5-({v}>$C{f})-({v}>$D{f})-({v}>$E{f})-({v}>$F{f})"
+                celdas_score.append(f"IF(ISNUMBER({v}),{puntos},1)*$B{f}")
+            formula(rt, f"{col}{fin_f + 1}", "+".join(celdas_score), num_format="0.00", bold=True, top=1, align="right")
+            nota = f"{col}{fin_f + 1}"
+            letras = "".join(f'IF({nota}>={m},"{n}",' for m, n in ESCALA) + '"CCC"' + ")" * len(ESCALA)
+            formula(rt, f"{col}{fin_f + 2}", letras, bold=True, align="center", font_color=ENCABEZADO)
+
+    # --- Covenants
+    cv = nueva_hoja("Covenants", "Covenants", "Cuánto margen tiene cada empresa antes de incumplir. Los límites son supuestos: los 20-F no publican los de cada contrato.", "#EDA100")
+    cv.set_column("A:A", 44)
+    cv.set_column("B:H", 11)
+    cv.write("A4", "Máximo de deuda neta / EBITDA", fmt())
+    cv.write("B4", 3.5, fmt(font_color=AZUL, bg_color=RESALTE, border=1, border_color=LINEA, num_format=X))
+    cv.write("A5", "Mínimo de EBITDA / intereses", fmt())
+    cv.write("B5", 2.0, fmt(font_color=AZUL, bg_color=RESALTE, border=1, border_color=LINEA, num_format=X))
+    cv.write("C4", "Supuesto: límites habituales en deuda de energía de la región. Vista declara covenants financieros y dice cumplirlos.", fmt(font_color=GRIS, font_size=8))
+    cv.write_row(6, 0, ["Empresa y escenario", "2025 real"] + PROYECCION + ["Peor año", "Estado", "EBITDA puede caer"], fmt(**{**encabezado, "text_wrap": True}))
+    cv.set_row(6, 30)
+    f = 8
+    for e in EMPRESAS:
+        for nombre, cols in escenarios:
+            for medida, limite, peor, mayor in (("Deuda neta / EBITDA", "$B$4", "MAX", False), ("EBITDA / intereses", "$B$5", "MIN", True)):
+                cv.write(f"A{f}", f"{e} {nombre.lower()}: {medida.lower()}", fmt())
+                filap = salida[e][medida]
+                fp(cv, f"B{f}", f"Proyección!$B${filap}", num_format=X, font_color=VERDE, align="right")
+                for i, c in enumerate(cols):
+                    fp(cv, f"{'CDE'[i]}{f}", f"Proyección!${c}${filap}", num_format=X, font_color=VERDE, align="right")
+                fp(cv, f"F{f}", f"{peor}(C{f}:E{f})", num_format=X, align="right")
+                condicion = f"F{f}>={limite}" if mayor else f"F{f}<={limite}"
+                fp(cv, f"G{f}", f'IF({condicion},"Cumple","Incumple")', align="center")
+                ebitda, deuda_neta = f"Proyección!$B${salida[e]['EBITDA']}", f"(Proyección!$B${salida[e]['Deuda']}-Proyección!$B${salida[e]['Caja e inversiones']})"
+                caida = f"1-{deuda_neta}/{limite}/{ebitda}" if not mayor else f"1-{limite}*Proyección!$B${salida[e]['Intereses']}/{ebitda}"
+                fp(cv, f"H{f}", f"MAX(0,{caida})" if nombre == "Base" else '""', num_format="0%", align="right")
+                f += 1
+        f += 1
+    cv.conditional_format(f"G8:G{f}", {"type": "cell", "criteria": "==", "value": '"Incumple"', "format": wb.add_format({"font_color": "#9C0006", "bg_color": "#FFC7CE"})})
+    cv.conditional_format(f"G8:G{f}", {"type": "cell", "criteria": "==", "value": '"Cumple"', "format": wb.add_format({"font_color": "#006100", "bg_color": "#C6EFCE"})})
+    cv.write(f"A{f + 1}", "EBITDA puede caer: cuánto podría bajar el EBITDA de 2025, con la deuda y los intereses de 2025, antes de llegar al límite.", fmt(font_color=GRIS, font_size=8))
 
     # --- Mercado
     k = nueva_hoja("Mercado", "Series de mercado", "Riesgo país: ArgentinaDatos. Tesoro de EE.UU.: FRED. BADLAR y adelantos a empresas: BCRA. Se actualiza con python -m empresas.mercado.", "#898781")
