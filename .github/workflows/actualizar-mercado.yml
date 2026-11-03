@@ -1,0 +1,53 @@
+name: Actualizar mercado
+
+# Cada lunes baja riesgo país, Tesoro de EE.UU. y tasas del BCRA, y regenera el Excel, la capa SQL, el modelo y el memo.
+# Los balances no cambian solos: se cargan cuando sale un nuevo 20-F.
+on:
+  schedule:
+    - cron: "0 12 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: datos
+  cancel-in-progress: false
+
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PYTHONPATH: src
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Series de mercado
+        run: python -m empresas.mercado
+
+      - name: Excel, SQL, modelo y memo
+        run: |
+          python -m empresas.plantilla
+          python -m empresas.sql
+          python -m empresas.tendencias
+          python -m empresas.memo
+
+      - name: Tests
+        run: pytest -q
+
+      - name: Commitear resultados
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data excel outputs docs/memo_credito.md
+          git diff --staged --quiet || git commit -m "Datos: mercado al $(date +%Y-%m-%d)"
+          git push

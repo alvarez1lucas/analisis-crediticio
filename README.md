@@ -4,4 +4,5 @@
 
 **Estado:** en construcción. `excel/analisis_crediticio.xlsx` tiene la carga de balances con controles de cuadre, los ratios comparados, las emisiones y las series de mercado. Pampa, YPF y Vista tienen 2023 a 2025 cargados desde sus estados contables en dólares, con 42 ON y 25 créditos.
 
-`python -m empresas.mercado` actualiza las series, `python -m empresas.plantilla` genera el Excel y `python -m empresas.memo` escribe el memo. Antes de regenerar guarda en `data/balances.csv` lo cargado a mano en la hoja de Pampa.
+Orden de ejecución: `empresas.mercado` (series), `empresas.plantilla` (Excel), `empresas.sql` (capa SQL con DuckDB en `sql/`),
+`empresas.tendencias` (modelo de instrumento), `empresas.memo` (memo) y `empresas.sitio` (sitio). GitHub Actions actualiza el mercado cada lunes. Antes de regenerar guarda en `data/balances.csv` lo cargado a mano en la hoja de Pampa.

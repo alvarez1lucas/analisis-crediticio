@@ -4,3 +4,6 @@ __pycache__/
 /.venv/
 /excel/~$*
 /fuentes/
+
+# Sitio generado (se construye y publica en GitHub Actions)
+/site/
