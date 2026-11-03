@@ -6,7 +6,15 @@
 
 **Stack:** Excel, SQL con DuckDB, Python (pandas, statsmodels), Plotly, Power BI, pytest, GitHub Actions, GitHub Pages.
 
-**Estado:** en construcción. `excel/analisis_crediticio.xlsx` tiene la carga de balances con controles de cuadre, los ratios comparados, las emisiones y las series de mercado. Pampa, YPF y Vista tienen 2023 a 2025 cargados desde sus estados contables en dólares, con 42 ON y 25 créditos.
+## Qué tiene
 
-Orden de ejecución: `empresas.mercado` (series), `empresas.plantilla` (Excel), `empresas.sql` (capa SQL con DuckDB en `sql/`),
-`empresas.tendencias` (modelo de instrumento), `empresas.memo` (memo) y `empresas.sitio` (sitio). GitHub Actions actualiza el mercado cada lunes. Antes de regenerar guarda en `data/balances.csv` lo cargado a mano en la hoja de Pampa.
+- **Balances:** Pampa, YPF y Vista, 2023 a 2025, cargados desde sus estados contables en dólares, con controles de cuadre contra lo informado.
+- **Deuda:** 42 obligaciones negociables y 25 créditos, con riesgo país, Tesoro de EE.UU. y tasa bancaria del momento de cada emisión.
+- **Análisis:** rating interno, proyección 2026-2028 con escenario de estrés, covenants y regresión logística sobre la elección de instrumento.
+- **Controles:** 30 tests; SQL, Excel y Power BI dan las mismas cifras.
+
+## Cómo correrlo
+
+`pip install -r requirements.txt` y, con `PYTHONPATH=src`: `empresas.mercado` (series), `empresas.plantilla` (Excel), `empresas.sql` (capa SQL en `sql/`),
+`empresas.tendencias` (modelo), `empresas.memo` (memo y exportaciones), `empresas.sitio` (sitio) y `empresas.powerbi` (tablero).
+GitHub Actions actualiza el mercado cada lunes. Los balances están en `data/balances.csv` y se actualizan cuando sale un nuevo 20-F.
