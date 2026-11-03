@@ -3,6 +3,7 @@
   "pageOrder": [
     "resumen",
     "balances",
+    "deuda",
     "financiamiento",
     "estres"
   ],

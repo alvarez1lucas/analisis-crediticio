@@ -41,18 +41,23 @@ TABLAS = {
     "proyeccion": ("outputs/proyeccion.csv", ()),
     "rating": ("outputs/rating.csv", ()),
     "mercado": ("data/mercado.csv", ("fecha",)),
+    "vencimientos": ("outputs/vencimientos.csv", ()),
+    "puente": ("outputs/puente.csv", ()),
 }
-RELACIONES = [(t, "empresa", "dim_empresa", "empresa") for t in ("indicadores", "emisiones", "tendencias", "proyeccion", "rating")]
-ORDEN = {("dim_empresa", "empresa"): "orden"}
+RELACIONES = [(t, "empresa", "dim_empresa", "empresa") for t in ("indicadores", "emisiones", "tendencias", "proyeccion", "rating", "vencimientos", "puente")]
+ORDEN = {("dim_empresa", "empresa"): "orden", ("puente", "concepto"): "orden"}
 FORMATO = {("emisiones", "tasa"): "0.00%", ("emisiones", "cupon"): "0.00%", ("emisiones", "monto"): "#,0", ("emisiones", "riesgo_pais"): "#,0",
            ("emisiones", "prima_riesgo_pais_pb"): "#,0", ("emisiones", "spread_pb"): "#,0", ("emisiones", "plazo"): "0.0",
-           ("rating", "on_deuda"): "0%", ("rating", "ebitda_puede_caer"): "0%", ("rating", "puntaje_2025"): "0.00", ("rating", "puntaje_estres"): "0.00",
+           ("rating", "on_deuda"): "0%", ("rating", "caja_2025"): "#,0", ("rating", "vence_primer_anio"): "#,0", ("rating", "caja_sobre_vencimientos"): "#,0.0x",
+           ("rating", "anios_cubiertos"): "0", ("rating", "ebitda_puede_caer"): "0%", ("rating", "puntaje_2025"): "0.00", ("rating", "puntaje_estres"): "0.00",
            **{("rating", c): "#,0.0x" for c in ("deuda_neta_ebitda", "ebitda_intereses", "liquidez_corriente", "peor_apalancamiento_estres",
                                                  "peor_cobertura_estres", "peor_servicio_estres")}}
 INDICADORES = {"Margen EBITDA": ("margen_ebitda", "0.0%"), "Deuda neta / EBITDA": ("deuda_neta_ebitda", VECES),
                "EBITDA / intereses": ("ebitda_intereses", VECES), "Liquidez corriente": ("liquidez_corriente", VECES),
                "Flujo libre / deuda": ("flujo_libre_deuda", "0.0%"), "ON / deuda": ("on_deuda", "0.0%"),
-               "Deuda en dólares": ("dolares_deuda", "0.0%"), "Capex / ventas": ("capex_ventas", "0.0%")}
+               "Deuda en dólares": ("dolares_deuda", "0.0%"), "Capex / ventas": ("capex_ventas", "0.0%"),
+               "Rentabilidad sobre patrimonio": ("roe", "0.0%"), "Margen neto": ("margen_neto", "0.0%"),
+               "Rotación de activos": ("rotacion_activos", "0.00"), "Activo / patrimonio": ("activo_patrimonio", "#,0.0x")}
 MEDIDAS = [(n, f'CALCULATE(SUM(indicadores[valor]), indicadores[indicador] = "{c}")', f) for n, (c, f) in INDICADORES.items()] + [
     ("Monto emitido", "SUM(emisiones[monto])", "#,0"),
     ("Tasa media ponderada", "DIVIDE(SUMX(emisiones, emisiones[monto] * emisiones[tasa]), SUM(emisiones[monto]))", "0.00%"),
@@ -60,6 +65,8 @@ MEDIDAS = [(n, f'CALCULATE(SUM(indicadores[valor]), indicadores[indicador] = "{c
     ("Riesgo país al emitir", "AVERAGE(emisiones[riesgo_pais])", "#,0"),
     ("Proyección deuda neta / EBITDA", 'CALCULATE(SUM(proyeccion[valor]), proyeccion[indicador] = "deuda_neta_ebitda")', VECES),
     ("Proyección cobertura de servicio", 'CALCULATE(SUM(proyeccion[valor]), proyeccion[indicador] = "cobertura_servicio")', VECES),
+    ("% de la deuda", "DIVIDE(SUM(vencimientos[monto]), CALCULATE(SUM(vencimientos[monto]), REMOVEFILTERS(vencimientos[anio], vencimientos[tipo], vencimientos[moneda])))", "0%"),
+    ("Monto del puente", "SUM(puente[monto])", "#,0"),
 ]
 
 
@@ -377,6 +384,32 @@ def estres(d: dict) -> Pagina:
     return pg
 
 
+def deuda(d: dict) -> Pagina:
+    pg = Pagina("deuda", "Deuda y caja")
+    venc = {e: d["vencimientos"][e] for e in p.EMPRESAS}
+    pa, yp = venc["Pampa"], venc["YPF"]
+    encabezado(pg, "Cuándo vence la deuda y adónde se va la plata",
+               f"Con su caja, Pampa paga todo lo que vence hasta {pa['primer_hueco'] - 1}; a YPF le vence en {p.PROYECCION[0]} {memo.veces(yp['primer_anio'] / yp['caja'])} su caja")
+    selector_empresa(pg)
+    t = "vencimientos"
+    pg.agregar("clusteredColumnChart", 24, 84, 760, 300, {"Category": [col(t, "anio", "Año")], "Y": [med("% de la deuda", "% de la deuda")], "Series": [col("dim_empresa", "empresa", "Empresa")]},
+               "Qué parte de la deuda de 2025 vence cada año", {**ejes(), "dataPoint": colores_serie("dim_empresa", "empresa", COLOR_EMPRESA)},
+               orden=[(col(t, "anio"), "Ascending")])
+    campos = [col("dim_empresa", "empresa", "Empresa"), med("Rentabilidad sobre patrimonio", "ROE"), med("Margen neto", "Margen neto"),
+              med("Rotación de activos", "Rotación"), med("Activo / patrimonio", "Apalancamiento")]
+    pg.agregar("tableEx", 796, 84, 460, 300, {"Values": campos}, "DuPont 2025: ROE = margen neto x rotación x apalancamiento",
+               objetos=tabla_legible(campos, 460, 11.0, 8, 90), filtros=[filtro_lista("anio", "indicadores", "anio", [p.ANIOS[-1]])])
+    t = "puente"
+    pg.agregar("waterfallChart", 24, 396, 610, 290, {"Category": [col(t, "concepto", "Concepto")], "Y": [med("Monto del puente", "US$ M")]},
+               "Del EBITDA al flujo libre en 2025 (US$ M; elegí una empresa)", {**ejes(leyenda=False)},
+               filtros=[filtro_lista("anio", t, "anio", [p.ANIOS[-1]])], orden=[(col(t, "concepto"), "Ascending")])
+    campos = [col("rating", "empresa", "Empresa"), col("rating", "caja_2025", "Caja e inversiones"), col("rating", "vence_primer_anio", f"Vence en {p.PROYECCION[0]}"),
+              col("rating", "caja_sobre_vencimientos", f"Caja / vencimientos {p.PROYECCION[0]}"), col("rating", "anios_cubiertos", "Años de vencimientos que cubre la caja")]
+    pg.agregar("tableEx", 646, 396, 610, 290, {"Values": campos}, "Si el mercado se cierra: hasta cuándo alcanza la caja", objetos=tabla_legible(campos, 610, 12.0, 8))
+    pie(pg, "Vencimientos: notas de deuda de los 20-F y de Vista. YPF informa sólo el año de vencimiento de cada ON y reparte sus préstamos por rango de años.")
+    return pg
+
+
 def tema() -> dict:
     return {
         "name": "Análisis crediticio", "dataColors": list(COLOR_EMPRESA.values()) + ["#e34948", "#6250d6"], "background": SUPERFICIE, "foreground": TEXTO,
@@ -448,7 +481,7 @@ def main() -> None:
     d = memo.leer()
     modelo = pd.read_csv(OUTPUTS / "modelo_instrumento.csv").set_index("medida").valor
     escribir_modelo(SALIDA / f"{NOMBRE}.SemanticModel")
-    paginas = [resumen(d, modelo), balances(), financiamiento(modelo), estres(d)]
+    paginas = [resumen(d, modelo), balances(), deuda(d), financiamiento(modelo), estres(d)]
     escribir_informe(SALIDA / f"{NOMBRE}.Report", paginas)
     print(f"powerbi: {len(TABLAS) + 1} tablas, {len(MEDIDAS)} medidas, {sum(len(x.visuales) for x in paginas)} visuales")
 

@@ -18,3 +18,11 @@ relationship 79b1a246-bfb4-5c17-96a8-cedbfde99c77
 	fromColumn: rating.empresa
 	toColumn: dim_empresa.empresa
 
+relationship e5a4a1fe-970c-53b4-acfe-66998a313cbb
+	fromColumn: vencimientos.empresa
+	toColumn: dim_empresa.empresa
+
+relationship 5d99f58f-0d80-562d-a4d8-ff84d0ddd2d3
+	fromColumn: puente.empresa
+	toColumn: dim_empresa.empresa
+

@@ -18,6 +18,8 @@ ref table tendencias
 ref table proyeccion
 ref table rating
 ref table mercado
+ref table vencimientos
+ref table puente
 ref table Medidas
 
 ref cultureInfo en-US

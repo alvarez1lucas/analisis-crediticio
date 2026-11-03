@@ -1,0 +1,274 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "name": "deuda_05",
+  "position": {
+    "x": 646,
+    "y": 396,
+    "z": 500,
+    "height": 290,
+    "width": 610,
+    "tabOrder": 500
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "drillFilterOtherVisuals": true,
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "rating"
+                    }
+                  },
+                  "Property": "empresa"
+                }
+              },
+              "queryRef": "rating.empresa",
+              "nativeQueryRef": "rating_empresa",
+              "displayName": "Empresa"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "rating"
+                    }
+                  },
+                  "Property": "caja_2025"
+                }
+              },
+              "queryRef": "rating.caja_2025",
+              "nativeQueryRef": "rating_caja_2025",
+              "displayName": "Caja e inversiones"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "rating"
+                    }
+                  },
+                  "Property": "vence_primer_anio"
+                }
+              },
+              "queryRef": "rating.vence_primer_anio",
+              "nativeQueryRef": "rating_vence_primer_anio",
+              "displayName": "Vence en 2026"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "rating"
+                    }
+                  },
+                  "Property": "caja_sobre_vencimientos"
+                }
+              },
+              "queryRef": "rating.caja_sobre_vencimientos",
+              "nativeQueryRef": "rating_caja_sobre_vencimientos",
+              "displayName": "Caja / vencimientos 2026"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "rating"
+                    }
+                  },
+                  "Property": "anios_cubiertos"
+                }
+              },
+              "queryRef": "rating.anios_cubiertos",
+              "nativeQueryRef": "rating_anios_cubiertos",
+              "displayName": "Años de vencimientos que cubre la caja"
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "total": [
+        {
+          "properties": {
+            "totals": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "columnHeaders": [
+        {
+          "properties": {
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "12.0D"
+                }
+              }
+            },
+            "wordWrap": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "values": [
+        {
+          "properties": {
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "12.0D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "grid": [
+        {
+          "properties": {
+            "rowPadding": {
+              "expr": {
+                "Literal": {
+                  "Value": "8L"
+                }
+              }
+            },
+            "textSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "12.0D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "columnWidth": [
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "113.0D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "rating.empresa"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "113.0D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "rating.caja_2025"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "113.0D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "rating.vence_primer_anio"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "113.0D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "rating.caja_sobre_vencimientos"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "113.0D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "rating.anios_cubiertos"
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Si el mercado se cierra: hasta cuándo alcanza la caja'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

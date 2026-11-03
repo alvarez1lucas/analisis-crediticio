@@ -33,6 +33,22 @@ table Medidas
 		formatString: 0.0%
 		lineageTag: 8678172d-fd9b-59b7-adf5-0f2220feb5e2
 
+	measure 'Rentabilidad sobre patrimonio' = CALCULATE(SUM(indicadores[valor]), indicadores[indicador] = "roe")
+		formatString: 0.0%
+		lineageTag: fa27c176-9e8a-5796-aef9-9f3834c628cc
+
+	measure 'Margen neto' = CALCULATE(SUM(indicadores[valor]), indicadores[indicador] = "margen_neto")
+		formatString: 0.0%
+		lineageTag: 9258dff5-b9b3-594b-b4ae-97d738a3f196
+
+	measure 'Rotación de activos' = CALCULATE(SUM(indicadores[valor]), indicadores[indicador] = "rotacion_activos")
+		formatString: 0.00
+		lineageTag: 85661470-b918-5ee6-8d61-da537b94c10f
+
+	measure 'Activo / patrimonio' = CALCULATE(SUM(indicadores[valor]), indicadores[indicador] = "activo_patrimonio")
+		formatString: #,0.0x
+		lineageTag: ccda9e93-7ed0-5695-bcb5-2d625f898c6c
+
 	measure 'Monto emitido' = SUM(emisiones[monto])
 		formatString: #,0
 		lineageTag: 41813379-a884-57a8-8f79-2a8d724c2cd0
@@ -56,6 +72,14 @@ table Medidas
 	measure 'Proyección cobertura de servicio' = CALCULATE(SUM(proyeccion[valor]), proyeccion[indicador] = "cobertura_servicio")
 		formatString: #,0.0x
 		lineageTag: 1ba3f760-2ee7-5cfd-bd0f-24b56e2c4e75
+
+	measure '% de la deuda' = DIVIDE(SUM(vencimientos[monto]), CALCULATE(SUM(vencimientos[monto]), REMOVEFILTERS(vencimientos[anio], vencimientos[tipo], vencimientos[moneda])))
+		formatString: 0%
+		lineageTag: 41b746f5-df5f-5922-9b86-c30856578c9c
+
+	measure 'Monto del puente' = SUM(puente[monto])
+		formatString: #,0
+		lineageTag: 408d939b-d650-56bf-8d6c-ddf115614460
 
 	column _
 		dataType: string

@@ -123,12 +123,48 @@ table rating
 
 		annotation SummarizationSetBy = Automatic
 
+	column caja_2025
+		dataType: double
+		formatString: #,0
+		lineageTag: 8fef9290-eb54-59ee-b165-0ddfe2780ab4
+		summarizeBy: none
+		sourceColumn: caja_2025
+
+		annotation SummarizationSetBy = Automatic
+
+	column vence_primer_anio
+		dataType: double
+		formatString: #,0
+		lineageTag: 593d1b87-c4d3-5a86-ad2a-32d827ec1e09
+		summarizeBy: none
+		sourceColumn: vence_primer_anio
+
+		annotation SummarizationSetBy = Automatic
+
+	column caja_sobre_vencimientos
+		dataType: double
+		formatString: #,0.0x
+		lineageTag: 135affca-063e-5fa4-8561-fb9fd6b58727
+		summarizeBy: none
+		sourceColumn: caja_sobre_vencimientos
+
+		annotation SummarizationSetBy = Automatic
+
+	column anios_cubiertos
+		dataType: int64
+		formatString: 0
+		lineageTag: 85ee6cde-4ffb-518f-83bb-f27824d50805
+		summarizeBy: none
+		sourceColumn: anios_cubiertos
+
+		annotation SummarizationSetBy = Automatic
+
 	partition rating = m
 		mode: import
 		source =
 				let
 				    Origen = Csv.Document(File.Contents(RutaDatos & "\outputs\rating.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
 				    Encabezados = Table.PromoteHeaders(Origen, [PromoteAllScalars = true]),
-				    Resultado = Table.TransformColumnTypes(Encabezados, {{"empresa", type text}, {"orden", Int64.Type}, {"rating_2025", type text}, {"rating_estres", type text}, {"puntaje_2025", type number}, {"puntaje_estres", type number}, {"deuda_neta_ebitda", type number}, {"ebitda_intereses", type number}, {"liquidez_corriente", type number}, {"on_deuda", type number}, {"peor_apalancamiento_estres", type number}, {"peor_cobertura_estres", type number}, {"peor_servicio_estres", type number}, {"ebitda_puede_caer", type number}}, "en-US")
+				    Resultado = Table.TransformColumnTypes(Encabezados, {{"empresa", type text}, {"orden", Int64.Type}, {"rating_2025", type text}, {"rating_estres", type text}, {"puntaje_2025", type number}, {"puntaje_estres", type number}, {"deuda_neta_ebitda", type number}, {"ebitda_intereses", type number}, {"liquidez_corriente", type number}, {"on_deuda", type number}, {"peor_apalancamiento_estres", type number}, {"peor_cobertura_estres", type number}, {"peor_servicio_estres", type number}, {"ebitda_puede_caer", type number}, {"caja_2025", type number}, {"vence_primer_anio", type number}, {"caja_sobre_vencimientos", type number}, {"anios_cubiertos", Int64.Type}}, "en-US")
 				in
 				    Resultado

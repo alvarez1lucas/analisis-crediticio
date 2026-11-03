@@ -188,7 +188,10 @@ def exportar(d: dict) -> None:
         filas.append(dict(empresa=e, orden=k + 1, rating_2025=x["nota"], rating_estres=x["nota_estres"], puntaje_2025=x["puntaje"], puntaje_estres=x["puntaje_estres"],
                           deuda_neta_ebitda=r["Deuda neta / EBITDA"], ebitda_intereses=r["EBITDA / intereses"], liquidez_corriente=r["Liquidez corriente"],
                           on_deuda=r["ON / deuda financiera"], peor_apalancamiento_estres=max(x["estres"]["apal"]), peor_cobertura_estres=min(x["estres"]["cob"]),
-                          peor_servicio_estres=min(x["estres"]["dscr"]), ebitda_puede_caer=d["covenants"]["margen"][e]))
+                          peor_servicio_estres=min(x["estres"]["dscr"]), ebitda_puede_caer=d["covenants"]["margen"][e],
+                          caja_2025=d["vencimientos"][e]["caja"], vence_primer_anio=d["vencimientos"][e]["primer_anio"],
+                          caja_sobre_vencimientos=d["vencimientos"][e]["caja"] / d["vencimientos"][e]["primer_anio"],
+                          anios_cubiertos=(d["vencimientos"][e]["primer_hueco"] or max(d["vencimientos"][e]["por_anio"]) + 1) - p.PROYECCION[0]))
     pd.DataFrame(filas).to_csv(salida / "rating.csv", index=False, encoding="utf-8")
     proy = []
     reales = {"deuda_neta_ebitda": "Deuda neta / EBITDA", "cobertura_servicio": "Cobertura de servicio de deuda"}
