@@ -14,10 +14,16 @@ WITH base AS (
              THEN d_on / (deuda_cp + deuda_lp) END                              AS on_deuda,
         CASE WHEN deuda_cp + deuda_lp > 0 AND m_dolar + m_linked + m_pesos + m_otra > 0
              THEN m_dolar / (deuda_cp + deuda_lp) END                           AS dolares_deuda,
-        capex / NULLIF(ventas, 0)                                               AS capex_ventas
+        capex / NULLIF(ventas, 0)                                               AS capex_ventas,
+        -- DuPont: rentabilidad sobre patrimonio = margen neto x rotación de activos x activo / patrimonio
+        CASE WHEN patrimonio > 0 THEN neto / patrimonio END                     AS roe,
+        neto / NULLIF(ventas, 0)                                                AS margen_neto,
+        CASE WHEN activo > 0 THEN ventas / activo END                           AS rotacion_activos,
+        CASE WHEN patrimonio > 0 THEN activo / patrimonio END                   AS activo_patrimonio
     FROM lineas
 )
 UNPIVOT base
-ON margen_ebitda, deuda_neta_ebitda, ebitda_intereses, liquidez_corriente, flujo_libre_deuda, on_deuda, dolares_deuda, capex_ventas
+ON margen_ebitda, deuda_neta_ebitda, ebitda_intereses, liquidez_corriente, flujo_libre_deuda, on_deuda, dolares_deuda, capex_ventas,
+   roe, margen_neto, rotacion_activos, activo_patrimonio
 INTO NAME indicador VALUE valor
 ORDER BY empresa, indicador, anio;

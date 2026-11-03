@@ -7,7 +7,9 @@ from empresas.sql import OUTPUTS
 
 # indicador de SQL -> fila de Ratios en el Excel
 EQUIVALENCIAS = {"margen_ebitda": "Margen EBITDA", "deuda_neta_ebitda": "Deuda neta / EBITDA", "ebitda_intereses": "EBITDA / intereses",
-                 "liquidez_corriente": "Liquidez corriente", "flujo_libre_deuda": "Flujo libre / deuda", "capex_ventas": "Capex / ventas"}
+                 "liquidez_corriente": "Liquidez corriente", "flujo_libre_deuda": "Flujo libre / deuda", "capex_ventas": "Capex / ventas",
+                 "roe": "Rentabilidad sobre patrimonio", "margen_neto": "Margen neto", "rotacion_activos": "Rotación de activos",
+                 "activo_patrimonio": "Activo / patrimonio"}
 
 
 @pytest.fixture(scope="module")
@@ -46,6 +48,21 @@ def test_sql_y_excel_dan_el_mismo_spread_de_cada_on(excel):
             assert r.spread_pb == pytest.approx(h[f"O{f}"].value, abs=1e-6)
         else:
             assert h[f"O{f}"].value == "n.a." and pd.isna(r.spread_pb)
+
+
+def test_dupont_multiplica_a_la_rentabilidad_sobre_patrimonio():
+    ind = pd.read_csv(OUTPUTS / "indicadores.csv").pivot_table(index=["empresa", "anio"], columns="indicador", values="valor")
+    producto = ind.margen_neto * ind.rotacion_activos * ind.activo_patrimonio
+    assert (producto - ind.roe).abs().max() < 1e-9
+
+
+def test_vencimientos_cuadran_con_la_deuda_del_balance_y_el_puente_con_el_flujo_libre():
+    v = pd.read_csv(OUTPUTS / "vencimientos.csv").groupby("empresa").monto.sum()
+    lineas = pd.read_csv(OUTPUTS / "lineas.csv")
+    ultimo = lineas[lineas.anio == p.ANIOS[-1]].set_index("empresa")
+    assert ((ultimo.deuda_cp + ultimo.deuda_lp) - v).abs().max() < 1
+    puente = pd.read_csv(OUTPUTS / "puente.csv").groupby(["empresa", "anio"]).monto.sum()
+    assert (puente - lineas.set_index(["empresa", "anio"]).fcf).abs().max() < 1e-9
 
 
 def test_modelo_de_instrumento():

@@ -12,7 +12,7 @@ from empresas.plantilla import ROOT
 
 SQL = ROOT / "sql"
 OUTPUTS = ROOT / "outputs"
-TABLAS = ["lineas", "indicadores", "emisiones", "tendencias", "contexto"]
+TABLAS = ["lineas", "indicadores", "emisiones", "tendencias", "contexto", "vencimientos", "puente"]
 
 
 def conectar() -> duckdb.DuckDBPyConnection:

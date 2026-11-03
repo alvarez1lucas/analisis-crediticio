@@ -1,0 +1,95 @@
+empresa,tipo,instrumento,moneda,anio,monto,supuesto
+Pampa,ON,Clase 13,Dólar,2027,80.0,
+Pampa,ON,Clase 25,Dólar,2028,107.0,
+Pampa,ON,Clase 22,Dólar,2028,85.0,
+Pampa,ON,Clase 21,Dólar,2031,412.0,
+Pampa,ON,Clase 23,Dólar,2034,693.0,
+Pampa,ON,Clase 26,Dólar,2037,437.0,
+Pampa,Préstamo,Préstamo financiero,Dólar,2026,15.0,
+Pampa,Préstamo,Préstamo financiero,Dólar,2026,17.0,
+Pampa,Préstamo,Préstamo financiero,Dólar,2028,46.0,
+Vista,ON,ON XII,Dólar linked,2031,87.233,
+Vista,ON,ON XVI,Dólar linked,2026,104.151,
+Vista,ON,ON XVII,Dólar linked,2026,39.064,
+Vista,ON,ON XVIII,Dólar linked,2027,118.319,
+Vista,ON,ON XIX,Dólar linked,2028,16.432,
+Vista,ON,ON XXI,Dólar linked,2028,69.899,
+Vista,ON,ON XXII,Dólar,2026,14.726,
+Vista,ON,ON XXIII,Dólar,2027,73.463,
+Vista,ON,ON XXIV,Dólar,2029,46.942,
+Vista,ON,ON XXV,Dólar linked,2028,53.239,
+Vista,ON,ON XXVI,Dólar,2031,151.747,
+Vista,ON,ON XXVII,Dólar,2035,597.954,
+Vista,ON,ON XXVIII,Dólar,2030,94.038,
+Vista,ON,ON XXIX,Dólar,2033,899.341,
+Vista,ON,ON XXX,Dólar,2027,73.796,
+Vista,Préstamo,Santander International,Dólar,2026,0.068,
+Vista,Préstamo,Santander International,Dólar,2026,0.077,
+Vista,Préstamo,Santander International,Dólar,2027,0.028,
+Vista,Préstamo,ConocoPhillips,Dólar,2026,25.734,
+Vista,Préstamo,Citibank,Dólar linked,2026,20.108,
+Vista,Préstamo,Citibank,Dólar linked,2026,25.16,
+Vista,Préstamo,Citibank,Dólar linked,2027,40.143,
+Vista,Préstamo,Citibank,Dólar linked,2027,10.037,
+Vista,Préstamo,Banco de Galicia,Dólar,2030,100.927,
+Vista,Préstamo,ICBC,Dólar,2030,50.255,
+Vista,Préstamo,Itaú Unibanco,Dólar,2030,246.931,
+Vista,Préstamo,ICBC,Dólar,2030,101.099,
+Vista,Préstamo,BBVA Argentina,Dólar,2026,40.008,
+Vista,Préstamo,Banco de Galicia,Dólar,2026,31.836,
+Vista,Préstamo,Banco de Galicia,Dólar,2026,0.41,
+Vista,Préstamo,Banco de Galicia,Dólar,2026,20.912,
+YPF,ON,1998,Dólar,2028,15.0,Sólo se informa el año de vencimiento
+YPF,ON,Clase LIII,Dólar,2026,19.0,Parte corriente: vence en 2026
+YPF,ON,Clase LIII,Dólar,2027,648.0,Sólo se informa el año de vencimiento
+YPF,ON,Clase LIV,Dólar,2026,2.0,Parte corriente: vence en 2026
+YPF,ON,Clase LIV,Dólar,2047,530.0,Sólo se informa el año de vencimiento
+YPF,ON,Clase I,Dólar,2029,397.0,Sólo se informa el año de vencimiento
+YPF,ON,Clase XVII,Dólar,2026,216.0,Parte corriente: vence en 2026
+YPF,ON,Clase XVII,Dólar,2029,537.0,Sólo se informa el año de vencimiento
+YPF,ON,Clase XVIII,Dólar,2026,11.0,Parte corriente: vence en 2026
+YPF,ON,Clase XVIII,Dólar,2033,558.0,Sólo se informa el año de vencimiento
+YPF,ON,Clase XX,Dólar linked,2026,65.0,Parte corriente: vence en 2026
+YPF,ON,Clase XX,Dólar linked,2032,329.0,Sólo se informa el año de vencimiento
+YPF,ON,Clase XXI,Dólar linked,2026,154.0,
+YPF,ON,Clase XXIV,Dólar linked,2027,38.0,Sólo se informa el año de vencimiento
+YPF,ON,Clase XXV,Dólar,2026,188.0,
+YPF,ON,Clase XXVI,Dólar linked,2028,400.0,Sólo se informa el año de vencimiento
+YPF,ON,Clase XXVII,Dólar linked,2026,133.0,
+YPF,ON,Clase XXVIII,Dólar,2026,114.0,Parte corriente: vence en 2026
+YPF,ON,Clase XXVIII,Dólar,2031,714.0,Sólo se informa el año de vencimiento
+YPF,ON,Clase XXIX,Dólar,2026,132.0,
+YPF,ON,Clase XXX,Dólar linked,2026,370.0,
+YPF,ON,Clase XXXI,Dólar,2026,21.0,Parte corriente: vence en 2026
+YPF,ON,Clase XXXI,Dólar,2031,1046.0,Sólo se informa el año de vencimiento
+YPF,ON,Clase XXXII,Dólar,2026,2.0,Parte corriente: vence en 2026
+YPF,ON,Clase XXXII,Dólar,2028,125.0,Sólo se informa el año de vencimiento
+YPF,ON,Clase XXXIII,Dólar,2028,25.0,Sólo se informa el año de vencimiento
+YPF,ON,Clase XXXIV,Dólar,2026,42.0,Parte corriente: vence en 2026
+YPF,ON,Clase XXXIV,Dólar,2034,1080.0,Sólo se informa el año de vencimiento
+YPF,ON,Clase XXXV,Dólar,2026,1.0,Parte corriente: vence en 2026
+YPF,ON,Clase XXXV,Dólar,2027,140.0,Sólo se informa el año de vencimiento
+YPF,ON,Clase XXXVII,Dólar,2026,2.0,Parte corriente: vence en 2026
+YPF,ON,Clase XXXVII,Dólar,2027,139.0,Sólo se informa el año de vencimiento
+YPF,ON,Clase XXXVIII,Dólar,2026,4.0,Parte corriente: vence en 2026
+YPF,ON,Clase XXXVIII,Dólar,2027,248.0,Sólo se informa el año de vencimiento
+YPF,ON,Clase XXXIX,Dólar,2026,8.0,Parte corriente: vence en 2026
+YPF,ON,Clase XXXIX,Dólar,2030,155.0,Sólo se informa el año de vencimiento
+YPF,ON,Clase XL,Dólar,2028,50.0,Sólo se informa el año de vencimiento
+YPF,ON,Clase XLI,Dólar,2026,1.0,Parte corriente: vence en 2026
+YPF,ON,Clase XLI,Dólar,2027,98.0,Sólo se informa el año de vencimiento
+YPF,ON,Clase XLII,Dólar,2026,1.0,Parte corriente: vence en 2026
+YPF,ON,Clase XLII,Dólar,2027,194.0,Sólo se informa el año de vencimiento
+YPF,Prefinanciación,Prefinanciación de exportaciones,Dólar,2026,197.0,
+YPF,Prefinanciación,Prefinanciación de exportaciones,Dólar,2027,76.5,Supuesto: lo no corriente se reparte parejo entre los años del rango informado
+YPF,Prefinanciación,Prefinanciación de exportaciones,Dólar,2028,76.5,Supuesto: lo no corriente se reparte parejo entre los años del rango informado
+YPF,Préstamo,Financiación de importaciones,Dólar,2026,20.0,
+YPF,Préstamo,Préstamos financieros,Dólar,2026,561.0,
+YPF,Préstamo,Préstamos financieros,Dólar,2027,136.5,Supuesto: lo no corriente se reparte parejo entre los años del rango informado
+YPF,Préstamo,Préstamos financieros,Dólar,2028,136.5,Supuesto: lo no corriente se reparte parejo entre los años del rango informado
+YPF,Préstamo,Préstamos financieros,Dólar,2029,136.5,Supuesto: lo no corriente se reparte parejo entre los años del rango informado
+YPF,Préstamo,Préstamos financieros,Dólar,2030,136.5,Supuesto: lo no corriente se reparte parejo entre los años del rango informado
+YPF,Préstamo,Pagarés bursátiles,Dólar,2026,64.0,
+YPF,Préstamo,Préstamos financieros,Pesos,2026,24.0,
+YPF,Préstamo,Préstamos financieros,Pesos,2027,61.0,Supuesto: lo no corriente se reparte parejo entre los años del rango informado
+YPF,Préstamo,Descubiertos,Pesos,2026,3.0,

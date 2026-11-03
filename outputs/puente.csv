@@ -1,0 +1,37 @@
+empresa,anio,orden,concepto,monto
+Pampa,2023,1,EBITDA,723.0
+Pampa,2023,2,Impuestos y capital de trabajo,-148.0
+Pampa,2023,3,Intereses pagados,-280.0
+Pampa,2023,4,Capex,-758.0
+Pampa,2024,1,EBITDA,636.0
+Pampa,2024,2,Impuestos y capital de trabajo,-201.0
+Pampa,2024,3,Intereses pagados,-145.0
+Pampa,2024,4,Capex,-447.0
+Pampa,2025,1,EBITDA,760.0
+Pampa,2025,2,Impuestos y capital de trabajo,18.0
+Pampa,2025,3,Intereses pagados,-161.0
+Pampa,2025,4,Capex,-993.0
+Vista,2023,1,EBITDA,818.414
+Vista,2023,2,Impuestos y capital de trabajo,-106.38099999999997
+Vista,2023,3,Intereses pagados,-22.993
+Vista,2023,4,Capex,-695.73
+Vista,2024,1,EBITDA,1058.882
+Vista,2024,2,Impuestos y capital de trabajo,-99.85600000000011
+Vista,2024,3,Intereses pagados,-53.897
+Vista,2024,4,Capex,-1063.858
+Vista,2025,1,EBITDA,1537.4550000000004
+Vista,2025,2,Impuestos y capital de trabajo,-741.2640000000004
+Vista,2025,3,Intereses pagados,-148.31
+Vista,2025,4,Capex,-1467.131
+YPF,2023,1,EBITDA,4313.0
+YPF,2023,2,Impuestos y capital de trabajo,1600.0
+YPF,2023,3,Intereses pagados,-623.0
+YPF,2023,4,Capex,-5673.0
+YPF,2024,1,EBITDA,4920.0
+YPF,2024,2,Impuestos y capital de trabajo,949.0
+YPF,2024,3,Intereses pagados,-707.0
+YPF,2024,4,Capex,-5392.0
+YPF,2025,1,EBITDA,5138.0
+YPF,2025,2,Impuestos y capital de trabajo,-179.0
+YPF,2025,3,Intereses pagados,-670.0
+YPF,2025,4,Capex,-5077.0

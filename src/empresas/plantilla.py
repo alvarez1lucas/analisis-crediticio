@@ -24,6 +24,7 @@ BALANCES = ROOT / "data" / "balances.csv"
 EMISIONES = ROOT / "data" / "emisiones.csv"
 CREDITOS = ROOT / "data" / "creditos.csv"
 TASAS_SISTEMA = ROOT / "data" / "tasas.csv"
+VENCIMIENTOS = ROOT / "data" / "deuda_vigente.csv"
 CARGA_MANUAL: list[str] = []  # hojas que se cargan a mano en el Excel; hoy todas salen de data/balances.csv
 PLAZOS_TESORO = [1, 2, 3, 5, 7, 10]
 INSTRUMENTOS = ["Dólar duro", "Dólar linked", "Pesos tasa variable", "Pesos tasa fija", "UVA"]
@@ -196,7 +197,7 @@ def formula_ratio(hoja: str, plantilla: str, i: int) -> str | None:
     return None if faltan else f
 
 
-def construir(archivo: Path, valores: dict, mercado: pd.DataFrame, balances: dict | None = None, emisiones: pd.DataFrame | None = None, creditos: pd.DataFrame | None = None, tasas: pd.DataFrame | None = None) -> None:
+def construir(archivo: Path, valores: dict, mercado: pd.DataFrame, balances: dict | None = None, emisiones: pd.DataFrame | None = None, creditos: pd.DataFrame | None = None, tasas: pd.DataFrame | None = None, vencimientos: pd.DataFrame | None = None) -> None:
     balances = balances or {}
     tasas = pd.DataFrame(columns=["mes", "doc_usd", "doc_usd_corto", "doc_usd_largo", "doc_ars", "pf_usd", "pf_ars"]) if tasas is None else tasas
     wb = xlsxwriter.Workbook(archivo)
@@ -409,6 +410,56 @@ def construir(archivo: Path, valores: dict, mercado: pd.DataFrame, balances: dic
                 extra = dict(font_color=VERDE) if calculo else {}
                 formula(u, f"{col}{f}", f'IF({cargado},"n.d.",{cuerpo})', num_format=MIL, align="right", **extra)
 
+    # --- Vencimientos
+    venc = pd.DataFrame(columns=["empresa", "tipo", "instrumento", "moneda", "anio", "monto", "supuesto"]) if vencimientos is None else vencimientos
+    vt = nueva_hoja("Vencimientos", "Muro de vencimientos", "Deuda financiera al 31-12-2025 por año de vencimiento, sin arrendamientos. US$ millones. Columnas A a G: datos de las notas de deuda.", "#E34948")
+    vt.set_column("A:B", 14)
+    vt.set_column("C:C", 28)
+    vt.set_column("D:F", 11)
+    vt.set_column("G:G", 40)
+    vt.set_column("I:L", 12)
+    vt.write_row(3, 0, ["Empresa", "Tipo", "Instrumento", "Moneda", "Año", "US$ M", "Supuesto"], fmt(**encabezado))
+    for i, fila_v in enumerate(venc.itertuples(index=False)):
+        f = 5 + i
+        for c, valor in zip("ABCDEFG", (fila_v.empresa, fila_v.tipo, fila_v.instrumento, fila_v.moneda, int(fila_v.anio), float(fila_v.monto), fila_v.supuesto)):
+            poner(vt, f"{c}{f}", valor, fmt(font_color=AZUL, num_format="#,##0.0" if c == "F" else "General", font_size=9 if c == "G" else 10))
+    fin_v = 4 + max(len(venc), 1)
+    rango_v = lambda c: f"${c}$5:${c}${fin_v}"
+    vt.write_row(3, 8, ["Año"] + EMPRESAS, fmt(**encabezado))
+    fila_venc = {}
+    anios_v = list(range(PROYECCION[0], PROYECCION[0] + 10))
+    for j, a in enumerate(anios_v + ["Después"]):
+        f = 5 + j
+        fila_venc[a] = f
+        vt.write(f"I{f}", a if isinstance(a, int) else f"{anios_v[-1] + 1} y después", fmt(align="left"))
+        for k, e in enumerate(EMPRESAS):
+            criterio = f'">={anios_v[-1] + 1}"' if isinstance(a, str) else str(a)
+            formula(vt, f"{'JKL'[k]}{f}", f'SUMIFS({rango_v("F")},{rango_v("A")},"{e}",{rango_v("E")},{criterio})', num_format=MIL, font_color="#0B0B0B")
+    f_total = 5 + len(anios_v) + 1
+    vt.write(f"I{f_total}", "Total", fmt(bold=True, top=1))
+    vt.write(f"I{f_total + 1}", "Deuda financiera del balance", fmt())
+    vt.write(f"I{f_total + 2}", "Caja e inversiones 2025", fmt())
+    vt.write(f"I{f_total + 3}", f"Vence hasta {PROYECCION[-1]} / deuda", fmt())
+    vt.write(f"I{f_total + 4}", f"Caja / vencimientos {PROYECCION[0]}", fmt())
+    for k, e in enumerate(EMPRESAS):
+        c = "JKL"[k]
+        formula(vt, f"{c}{f_total}", f"SUM({c}5:{c}{f_total - 1})", num_format=MIL, bold=True, top=1)
+        formula(vt, f"{c}{f_total + 1}", f"{ref(e, 'deuda_cp', COLUMNAS[-1])}+{ref(e, 'deuda_lp', COLUMNAS[-1])}", num_format=MIL, font_color=VERDE)
+        formula(vt, f"{c}{f_total + 2}", f"{ref(e, 'caja', COLUMNAS[-1])}+{ref(e, 'inv_cp', COLUMNAS[-1])}", num_format=MIL, font_color=VERDE)
+        formula(vt, f"{c}{f_total + 3}", f'IF({c}{f_total}=0,"n.d.",SUM({c}5:{c}{4 + len(PROYECCION)})/{c}{f_total})', num_format=P, align="right")
+        formula(vt, f"{c}{f_total + 4}", f'IF({c}5=0,"n.d.",{c}{f_total + 2}/{c}5)', num_format=X, align="right")
+    vt.write(f"I{f_total + 6}", "Control: el total por año tiene que coincidir con la deuda del balance (diferencias por intereses devengados).", fmt(font_color=GRIS, font_size=8))
+    g_v = wb.add_chart({"type": "column"})
+    for k, e in enumerate(EMPRESAS):
+        g_v.add_series({"name": e, "categories": f"=Vencimientos!$I$5:$I${f_total - 1}", "values": f"=Vencimientos!${'JKL'[k]}$5:${'JKL'[k]}${f_total - 1}",
+                        "fill": {"color": COLOR_EMPRESA[e]}, "gap": 80})
+    g_v.set_title({"name": "Vencimientos por año (US$ M)", "name_font": {"name": "Arial", "size": 11}})
+    g_v.set_legend({"position": "bottom", "font": {"name": "Arial", "size": 9}})
+    g_v.set_y_axis({"num_format": "#,##0", "major_gridlines": {"visible": True, "line": {"color": LINEA}}, "num_font": {"name": "Arial", "size": 8}})
+    g_v.set_x_axis({"num_font": {"name": "Arial", "size": 8}})
+    g_v.set_size({"width": 620, "height": 300})
+    vt.insert_chart("N4", g_v)
+
     # --- Rating
     fp = lambda ws, celda, cuerpo, **k: formula(ws, celda, f'IFERROR({cuerpo},"n.d.")', **k)  # sin datos, sin errores
     nombres = [x[0] for x in RATIOS]
@@ -503,7 +554,7 @@ def construir(archivo: Path, valores: dict, mercado: pd.DataFrame, balances: dic
                      "Capex": r("amort"),
                      "Intereses": f"{ant('Deuda')}*{ant('Costo medio de la deuda')}",
                      "Dividendos": "0",
-                     "Vencimientos": f"{ant('Deuda')}/{sup('vida')}",
+                     "Vencimientos": f"Vencimientos!${'JKL'[j]}${fila_venc[PROYECCION[i]]}+{ant('Deuda tomada a tasa nueva')}/{sup('vida')}",
                      "Necesidad de fondos": f"{x('Capex')}+{x('Intereses')}+{x('Dividendos')}-{x('Flujo operativo antes de intereses')}",
                      "Deuda": f"MAX(0,{ant('Deuda')}+{x('Necesidad de fondos')})",
                      "Deuda tomada a tasa nueva": f"MIN({x('Deuda')},{ant('Deuda tomada a tasa nueva')}+{x('Vencimientos')}+MAX(0,{x('Necesidad de fondos')}))",
@@ -517,7 +568,7 @@ def construir(archivo: Path, valores: dict, mercado: pd.DataFrame, balances: dic
                     formato = P if t in ("Tasa de deuda nueva", "Costo medio de la deuda") else X if t in ("Deuda neta / EBITDA", "EBITDA / intereses", "Cobertura de servicio de deuda") else MIL
                     fp(pr, x(t), cuerpo, num_format=formato, font_color=VERDE if t == "Capex" else "#0B0B0B", align="right")
         salida[e] = {t: fila(t) for t in lineas}
-    pr.write(f"A{20 + len(EMPRESAS) * alto_p}", "Mecánica: la necesidad de fondos se cubre con deuda nueva y la caja queda constante. Lo que vence se renueva a la tasa nueva. Sin dividendos.", fmt(font_color=GRIS, font_size=8))
+    pr.write(f"A{20 + len(EMPRESAS) * alto_p}", "Mecánica: la necesidad de fondos se cubre con deuda nueva y la caja queda constante. Vencen los montos de la hoja Vencimientos, más la deuda nueva según la vida media; lo que vence se renueva a la tasa nueva. Sin dividendos.", fmt(font_color=GRIS, font_size=8))
 
     # Puntajes del rating, ahora que existe la proyección
     for j, e in enumerate(EMPRESAS):
@@ -735,7 +786,7 @@ def leer_detalle(ruta: Path, fechas: list[str]) -> pd.DataFrame:
 def main() -> None:
     ARCHIVO.parent.mkdir(exist_ok=True)
     rescatar_manual()
-    datos = (pd.read_csv(MERCADO), leer_balances(), leer_detalle(EMISIONES, ["fecha", "vencimiento"]), leer_detalle(CREDITOS, ["inicio", "vencimiento"]), pd.read_csv(TASAS_SISTEMA))
+    datos = (pd.read_csv(MERCADO), leer_balances(), leer_detalle(EMISIONES, ["fecha", "vencimiento"]), leer_detalle(CREDITOS, ["inicio", "vencimiento"]), pd.read_csv(TASAS_SISTEMA), pd.read_csv(VENCIMIENTOS))
     construir(ARCHIVO, {}, *datos)
     valores = calcular(ARCHIVO)
     construir(ARCHIVO, valores, *datos)

@@ -4,12 +4,12 @@
 
 ## Recomendación
 
-**Aprobar una línea de hasta US$ 100 M a 3 años en dólares**, preferentemente como prefinanciación de exportaciones o préstamo amortizable,
+**Aprobar una línea de hasta US$ 110 M a 3 años en dólares**, preferentemente como prefinanciación de exportaciones o préstamo amortizable,
 con covenants de deuda neta / EBITDA ≤ 3,5x y EBITDA / intereses ≥ 2,0x.
 
 - **Por qué sí:** deuda neta / EBITDA de 1,1x, liquidez corriente de 3,1x y caja e inversiones por
   US$ 1.091 M. Rating interno **BBB** (puntaje 3,55 sobre 5).
-- **Cuánto:** en el escenario de estrés, Pampa podría sumar US$ 362 M de deuda sin pasar 3,0x de deuda neta / EBITDA en ningún año.
+- **Cuánto:** en el escenario de estrés, Pampa podría sumar US$ 395 M de deuda sin pasar 3,0x de deuda neta / EBITDA en ningún año.
   La línea propuesta es 28% de esa capacidad.
 - **Por qué no más:** el flujo libre fue negativo los tres años (US$ -463, -157, -376 M) y la cobertura de servicio de deuda de 2025 fue
   0,89x: Pampa paga sus vencimientos con deuda nueva, no con caja propia.
@@ -44,14 +44,15 @@ capex igual a la depreciación. Peor año de cada indicador:
 
 | Empresa | Deuda neta / EBITDA | EBITDA / intereses | Cobertura de servicio | Rating interno |
 |---|---|---|---|---|
-| Pampa | 2,3x | 2,8x | 0,95x | BBB → BB |
-| YPF | 3,1x | 3,3x | 1,16x | BB → BB |
-| Vista | 3,0x | 3,4x | 0,83x | BBB → BB |
+| Pampa | 2,3x | 3,2x | 0,99x | BBB → BB |
+| YPF | 3,1x | 3,3x | 1,25x | BB → BB |
+| Vista | 2,9x | 3,7x | 1,24x | BBB → BB |
 
 - **Pampa no rompe los covenants supuestos ni bajo estrés**, y en el escenario base su EBITDA podría caer 69% antes de llegar a
   3,5x de deuda neta / EBITDA.
-- **El riesgo real es refinanciar:** bajo estrés, la cobertura de servicio de deuda baja hasta 0,95x. Si el mercado se cierra,
-  la caja actual cubre aproximadamente 4,1 años de vencimientos.
+- **El riesgo real es refinanciar, pero no es inmediato:** bajo estrés, la cobertura de servicio de deuda baja hasta 0,99x.
+  Aun así, con la caja de 2025 (US$ 1.091 M) Pampa paga todo lo que vence hasta 2033 aunque el mercado se cierre.
+  YPF está en la situación opuesta: en 2026 le vencen US$ 2.355 M, 2,0x su caja.
 
 ## Condiciones propuestas
 
@@ -63,7 +64,7 @@ capex igual a la depreciación. Peor año de cada indicador:
 ## Riesgos y límites del análisis
 
 - **Riesgo soberano y de transferencia:** la empresa se financia por debajo del riesgo país, pero opera en Argentina. Este rating interno no aplica techo soberano.
-- **Concentración de vencimientos:** la proyección supone vencimientos parejos según la vida media de la deuda (7,7 años). En la práctica vencen en bloques
-  grandes, como la Clase 23 por US$ 700 M en 2034 (nota 12.5.2 del 20-F).
+- **Concentración de vencimientos:** Pampa paga poco hasta 2028 y después vencen bloques grandes:
+  US$ 412 M en 2031, US$ 693 M en 2034, US$ 437 M en 2037 (nota 12.5.2 del 20-F). La línea propuesta vence antes que esos bloques.
 - **Supuestos declarados:** los covenants, el límite interno de 3,0x y la parte del banco (30%) son supuestos, no datos de contratos.
 - **Cifras propias:** el EBITDA excluye resultados no recurrentes y asociadas, así que no coincide con el EBITDA ajustado que publica la empresa.

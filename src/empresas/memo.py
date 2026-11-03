@@ -65,7 +65,25 @@ def leer() -> dict:
                       "margen": {e: cv[f"H{8 + k * 5}"].value for k, e in enumerate(p.EMPRESAS)}}
     sup = wb["Proyección"]
     d["supuestos"] = {"caida": sup["B6"].value, "margen": sup["B7"].value, "tasa": sup["B8"].value}
+    d["vencimientos"] = vencimientos(d)
     return d
+
+
+def vencimientos(d: dict) -> dict:
+    """Por empresa: vencimientos por año, hasta qué año alcanza la caja de 2025 y los años con más vencimientos."""
+    import pandas as pd
+
+    v = pd.read_csv(p.VENCIMIENTOS).groupby(["empresa", "anio"]).monto.sum()
+    salida = {}
+    for e in p.EMPRESAS:
+        por_anio = v[e].sort_index()
+        caja = d[e]["linea"]["caja"] + d[e]["linea"]["inv_cp"]
+        acumulado = por_anio.cumsum()
+        cubre = acumulado[acumulado <= caja].index.max() if (acumulado <= caja).any() else None
+        primer_hueco = acumulado[acumulado > caja].index.min() if (acumulado > caja).any() else None
+        salida[e] = {"por_anio": por_anio.to_dict(), "caja": caja, "cubre_hasta": cubre, "primer_hueco": primer_hueco,
+                     "mayores": por_anio.nlargest(3).sort_index().to_dict(), "primer_anio": por_anio.get(p.PROYECCION[0], 0.0)}
+    return salida
 
 
 def capacidad(e: dict) -> float:
@@ -84,6 +102,7 @@ def escribir(d: dict) -> str:
         f"| {n} | " + " | ".join(f(e["ratio"][n]) for e in (pa, yp, vi)) + " |"
         for n, f in (("Margen EBITDA", pct), ("Deuda neta / EBITDA", veces), ("EBITDA / intereses", veces), ("Liquidez corriente", veces),
                      ("Flujo libre / deuda", pct), ("ON / deuda financiera", pct), ("Costo medio de la deuda", lambda x: pct(x, 1)), ("Altman Z'' mercados emergentes", veces)))
+    ve = d["vencimientos"]["Pampa"]
     rend = [x[2] for x in d["emisiones_pampa"]]
     corta = min(d["emisiones_pampa"], key=lambda x: x[1])
     zonas = {e: zona_altman(x["ratio"]["Altman Z'' mercados emergentes"]) for e, x in (("Pampa", pa), ("YPF", yp), ("Vista", vi))}
@@ -136,8 +155,9 @@ capex igual a la depreciación. Peor año de cada indicador:
 
 - **Pampa no rompe los covenants supuestos ni bajo estrés**, y en el escenario base su EBITDA podría caer {pct(d['covenants']['margen']['Pampa'])} antes de llegar a
   {veces(d['covenants']['apal'])} de deuda neta / EBITDA.
-- **El riesgo real es refinanciar:** bajo estrés, la cobertura de servicio de deuda baja hasta {veces(min(pa['estres']['dscr']), 2)}. Si el mercado se cierra,
-  la caja actual cubre aproximadamente {numero((pa['linea']['caja'] + pa['linea']['inv_cp']) / (pa['estres']['deuda'][0] / p.VIDA_MEDIA['Pampa']), 1)} años de vencimientos.
+- **El riesgo real es refinanciar, pero no es inmediato:** bajo estrés, la cobertura de servicio de deuda baja hasta {veces(min(pa['estres']['dscr']), 2)}.
+  Aun así, con la caja de 2025 (US$ {numero(ve['caja'], 0)} M) Pampa paga todo lo que vence hasta {ve['primer_hueco'] - 1} aunque el mercado se cierre.
+  YPF está en la situación opuesta: en {p.PROYECCION[0]} le vencen US$ {numero(d['vencimientos']['YPF']['primer_anio'], 0)} M, {veces(d['vencimientos']['YPF']['primer_anio'] / d['vencimientos']['YPF']['caja'])} su caja.
 
 ## Condiciones propuestas
 
@@ -149,8 +169,8 @@ capex igual a la depreciación. Peor año de cada indicador:
 ## Riesgos y límites del análisis
 
 - **Riesgo soberano y de transferencia:** la empresa se financia por debajo del riesgo país, pero opera en Argentina. Este rating interno no aplica techo soberano.
-- **Concentración de vencimientos:** la proyección supone vencimientos parejos según la vida media de la deuda ({numero(p.VIDA_MEDIA['Pampa'], 1)} años). En la práctica vencen en bloques
-  grandes, como la Clase 23 por US$ 700 M en 2034 (nota 12.5.2 del 20-F).
+- **Concentración de vencimientos:** Pampa paga poco hasta {p.PROYECCION[-1]} y después vencen bloques grandes:
+  {', '.join(f'US$ {numero(m, 0)} M en {a}' for a, m in ve['mayores'].items())} (nota 12.5.2 del 20-F). La línea propuesta vence antes que esos bloques.
 - **Supuestos declarados:** los covenants, el límite interno de {veces(LIMITE_INTERNO)} y la parte del banco ({pct(PARTE_DEL_BANCO)}) son supuestos, no datos de contratos.
 - **Cifras propias:** el EBITDA excluye resultados no recurrentes y asociadas, así que no coincide con el EBITDA ajustado que publica la empresa.
 """

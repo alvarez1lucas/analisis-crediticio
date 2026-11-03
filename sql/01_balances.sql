@@ -19,5 +19,8 @@ SELECT
     deuda_cp + arr_cp + deuda_lp + arr_lp - caja - inv_cp                       AS deuda_neta,
     caja + inv_cp + creditos + inventarios + otros_ac                           AS ac,
     deuda_cp + arr_cp + proveedores + otros_pc                                  AS pc,
-    cfo - int_pag - capex                                                       AS fcf
+    cfo - int_pag - capex                                                       AS fcf,
+    caja + inv_cp + creditos + inventarios + otros_ac + ppe + intang + inv_asoc + otros_anc AS activo,
+    ventas - costo - comercial - admin - explor + otros_op - deterioro
+        + asociadas + ing_fin - gasto_int + otros_fin - impuesto                AS neto
 FROM balances;
