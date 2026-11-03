@@ -1,3 +1,4 @@
+import re
 import openpyxl
 import pandas as pd
 import pytest
@@ -63,6 +64,20 @@ def test_vencimientos_cuadran_con_la_deuda_del_balance_y_el_puente_con_el_flujo_
     assert ((ultimo.deuda_cp + ultimo.deuda_lp) - v).abs().max() < 1
     puente = pd.read_csv(OUTPUTS / "puente.csv").groupby(["empresa", "anio"]).monto.sum()
     assert (puente - lineas.set_index(["empresa", "anio"]).fcf).abs().max() < 1e-9
+
+
+def test_colocadores_salen_de_emisiones_existentes_y_separan_roles():
+    c = pd.read_csv(OUTPUTS / "colocadores.csv")
+    e = pd.read_csv(OUTPUTS / "emisiones.csv")
+    assert set(zip(c.empresa, c.clase)) <= set(zip(e.empresa, e.clase))
+    assert set(c.rol) <= {"Organizador y colocador", "Colocador", "Colocador local", "Comprador inicial"}
+    assert (c[c.rol == "Comprador inicial"].tipo_entidad == "Banco de inversión del exterior").all()
+
+
+def test_la_guia_no_deja_huecos():
+    from empresas import guia, memo
+    texto = guia.escribir(guia.cifras(), memo.leer())
+    assert not re.search(r"bnanb|bNoneb", texto)
 
 
 def test_modelo_de_instrumento():

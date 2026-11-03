@@ -43,8 +43,10 @@ TABLAS = {
     "mercado": ("data/mercado.csv", ("fecha",)),
     "vencimientos": ("outputs/vencimientos.csv", ()),
     "puente": ("outputs/puente.csv", ()),
+    "colocadores_entidad": ("outputs/colocadores_entidad.csv", ()),
+    "colocadores_emision": ("outputs/colocadores_emision.csv", ("fecha",)),
 }
-RELACIONES = [(t, "empresa", "dim_empresa", "empresa") for t in ("indicadores", "emisiones", "tendencias", "proyeccion", "rating", "vencimientos", "puente")]
+RELACIONES = [(t, "empresa", "dim_empresa", "empresa") for t in ("indicadores", "emisiones", "tendencias", "proyeccion", "rating", "vencimientos", "puente", "colocadores_emision")]
 ORDEN = {("dim_empresa", "empresa"): "orden", ("puente", "concepto"): "orden"}
 FORMATO = {("emisiones", "tasa"): "0.00%", ("emisiones", "cupon"): "0.00%", ("emisiones", "monto"): "#,0", ("emisiones", "riesgo_pais"): "#,0",
            ("emisiones", "prima_riesgo_pais_pb"): "#,0", ("emisiones", "spread_pb"): "#,0", ("emisiones", "plazo"): "0.0",
@@ -67,6 +69,7 @@ MEDIDAS = [(n, f'CALCULATE(SUM(indicadores[valor]), indicadores[indicador] = "{c
     ("Proyección cobertura de servicio", 'CALCULATE(SUM(proyeccion[valor]), proyeccion[indicador] = "cobertura_servicio")', VECES),
     ("% de la deuda", "DIVIDE(SUM(vencimientos[monto]), CALCULATE(SUM(vencimientos[monto]), REMOVEFILTERS(vencimientos[anio], vencimientos[tipo], vencimientos[moneda])))", "0%"),
     ("Monto del puente", "SUM(puente[monto])", "#,0"),
+    ("Participaciones", "SUM(colocadores_entidad[emisiones])", "0"),
 ]
 
 
@@ -410,6 +413,33 @@ def deuda(d: dict) -> Pagina:
     return pg
 
 
+def bancos() -> Pagina:
+    from empresas import guia
+    x = guia.cifras()
+    co, si = x["colocacion"], x["sistema"]
+    pg = Pagina("bancos", "Bancos y fintech")
+    encabezado(pg, "Qué lugar le queda al banco y a la fintech",
+               f"Colocadores de {co['emisiones']} ON con aviso disponible: el banco coloca y distribuye; presta sobre todo a corto plazo", 1232)
+    t = "colocadores_entidad"
+    tipos = {"Banco": "#2a78d6", "ALyC": "#898781", "ALyC de un banco": "#6f6e69", "Plataforma digital": "#1baf7a", "Banco de inversión del exterior": "#eda100"}
+    pg.agregar("clusteredBarChart", 24, 84, 610, 450, {"Category": [col(t, "entidad", "Entidad")], "Y": [med("Participaciones", "Emisiones")], "Series": [col(t, "tipo_entidad", "Tipo")]},
+               f"En cuántas de las {co['emisiones']} emisiones participó cada entidad", {**ejes(), "dataPoint": colores_serie(t, "tipo_entidad", tipos)},
+               orden=[(med("Participaciones"), "Descending")])
+    t = "colocadores_emision"
+    campos = [col(t, "empresa", "Empresa"), col(t, "clase", "Clase"), col(t, "monto", "US$ M"), col(t, "bancos", "Bancos"), col(t, "alycs", "ALyC"),
+              col(t, "plataformas_digitales", "Plataformas"), col(t, "bancos_exterior", "Exterior")]
+    pg.agregar("tableEx", 646, 84, 610, 230, {"Values": campos}, "Entidades por tipo en cada emisión", objetos=tabla_legible(campos, 610, 10.0, 3))
+    textos = [("Empresa", f"Dólar duro desde {memo.numero(x['duro']['rp_min'], 0)} puntos de riesgo país; dólar linked sólo arriba de {memo.numero(x['linked']['rp_min'], 0)}. "
+                          "El banco, para plazos cortos y prefinanciación."),
+              ("Banco", f"Coloca sin asumir el riesgo: {' y '.join(co['siempre'])} estuvieron en todas. Prestando en dólares ganó unos "
+                        f"{memo.numero(si['credito'] - si['pf'], 1)} puntos sobre el plazo fijo en {p.ANIOS[-1]}."),
+              ("Fintech", f"No les presta: distribuye. Las plataformas digitales estuvieron en {co['con_plataforma']} de las {co['locales']} ON locales de la muestra.")]
+    for i, (titulo, texto) in enumerate(textos):
+        pg.texto(646, 326 + i * 70, 610, 64, [{"textRuns": [corrida(titulo, 12, negrita=True)]}, {"textRuns": [corrida(texto, 10, SECUNDARIO)]}], tarjeta=True)
+    pie(pg, f"Muestra: {co['emisiones']} de las 42 ON, las que tienen aviso de resultados o suplemento disponible. Comprador inicial: banco de inversión que compra la ON para revenderla afuera.")
+    return pg
+
+
 def tema() -> dict:
     return {
         "name": "Análisis crediticio", "dataColors": list(COLOR_EMPRESA.values()) + ["#e34948", "#6250d6"], "background": SUPERFICIE, "foreground": TEXTO,
@@ -481,7 +511,7 @@ def main() -> None:
     d = memo.leer()
     modelo = pd.read_csv(OUTPUTS / "modelo_instrumento.csv").set_index("medida").valor
     escribir_modelo(SALIDA / f"{NOMBRE}.SemanticModel")
-    paginas = [resumen(d, modelo), balances(), deuda(d), financiamiento(modelo), estres(d)]
+    paginas = [resumen(d, modelo), balances(), deuda(d), financiamiento(modelo), bancos(), estres(d)]
     escribir_informe(SALIDA / f"{NOMBRE}.Report", paginas)
     print(f"powerbi: {len(TABLAS) + 1} tablas, {len(MEDIDAS)} medidas, {sum(len(x.visuales) for x in paginas)} visuales")
 

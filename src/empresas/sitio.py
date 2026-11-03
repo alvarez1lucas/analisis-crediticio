@@ -113,7 +113,7 @@ def portada(d: dict, m: pd.DataFrame, graficos: list[str], emisiones: int) -> st
     return f"""
 <h1>¿Cuándo conviene una ON y cuándo un crédito?</h1>
 <p class="bajada">Pampa Energía, YPF y Vista, 2023-2025, con sus estados contables en dólares, {emisiones} emisiones de ON y series de mercado diarias.</p>
-<nav><a href="memo.html">Memo de crédito</a><a href="analisis_crediticio.xlsx">Modelo en Excel</a><a href="https://github.com/alvarez1lucas/analisis-crediticio">Código</a></nav>
+<nav><a href="memo.html">Memo de crédito</a><a href="guia.html">Guía: ON o crédito</a><a href="analisis_crediticio.xlsx">Modelo en Excel</a><a href="https://github.com/alvarez1lucas/analisis-crediticio">Código</a></nav>
 
 <h2>Hallazgos</h2>
 <ul>
@@ -161,6 +161,9 @@ def main() -> None:
     texto = memo.SALIDA.read_text(encoding="utf-8").replace("(../excel/analisis_crediticio.xlsx)", "(analisis_crediticio.xlsx)")
     cuerpo = '<nav><a href="index.html">Volver</a></nav>' + markdown.markdown(texto, extensions=["tables"])
     (SITIO / "memo.html").write_text(pagina("Memo de crédito", cuerpo), encoding="utf-8")
+    from empresas import guia
+    cuerpo = '<nav><a href="index.html">Volver</a></nav>' + markdown.markdown(guia.SALIDA.read_text(encoding="utf-8"), extensions=["tables"])
+    (SITIO / "guia.html").write_text(pagina("Guía de instrumentos", cuerpo), encoding="utf-8")
     shutil.copy(p.ARCHIVO, SITIO / p.ARCHIVO.name)
     print(f"sitio: {', '.join(x.name for x in sorted(SITIO.iterdir()))}")
 

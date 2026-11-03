@@ -1,0 +1,81 @@
+empresa,clase,entidad,tipo_entidad,rol,fuente,fecha,monto,instrumento
+Pampa,Clase 25,Banco Galicia,Banco,Colocador,"Aviso de resultados, 30-07-2025",2025-08-06,104.6,Dólar duro
+Pampa,Clase 25,Banco Patagonia,Banco,Colocador,"Aviso de resultados, 30-07-2025",2025-08-06,104.6,Dólar duro
+Pampa,Clase 25,Cocos Capital,Plataforma digital,Colocador,"Aviso de resultados, 30-07-2025",2025-08-06,104.6,Dólar duro
+Pampa,Clase 25,Banco Mariva,Banco,Colocador,"Aviso de resultados, 30-07-2025",2025-08-06,104.6,Dólar duro
+Pampa,Clase 25,Balanz,ALyC,Colocador,"Aviso de resultados, 30-07-2025",2025-08-06,104.6,Dólar duro
+Pampa,Clase 25,SBS Trading,ALyC,Colocador,"Aviso de resultados, 30-07-2025",2025-08-06,104.6,Dólar duro
+Pampa,Clase 25,Allaria,ALyC,Colocador,"Aviso de resultados, 30-07-2025",2025-08-06,104.6,Dólar duro
+Pampa,Clase 25,Adcap,ALyC,Colocador,"Aviso de resultados, 30-07-2025",2025-08-06,104.6,Dólar duro
+Pampa,Clase 25,Petrini,ALyC,Colocador,"Aviso de resultados, 30-07-2025",2025-08-06,104.6,Dólar duro
+Pampa,Clase 25,Latin Securities,ALyC,Colocador,"Aviso de resultados, 30-07-2025",2025-08-06,104.6,Dólar duro
+Pampa,Clase 25,Banco Provincia,Banco,Colocador,"Aviso de resultados, 30-07-2025",2025-08-06,104.6,Dólar duro
+Vista,ON XXV,Banco Santander,Banco,Colocador,Aviso de resultados,2024-07-15,53.195,Dólar linked
+Vista,ON XXV,Banco Galicia,Banco,Colocador,Aviso de resultados,2024-07-15,53.195,Dólar linked
+Vista,ON XXV,Macro Securities,ALyC de un banco,Colocador,Aviso de resultados,2024-07-15,53.195,Dólar linked
+Vista,ON XXV,Banco Comafi,Banco,Colocador,Aviso de resultados,2024-07-15,53.195,Dólar linked
+Vista,ON XXV,Banco Mariva,Banco,Colocador,Aviso de resultados,2024-07-15,53.195,Dólar linked
+Vista,ON XXV,Balanz,ALyC,Colocador,Aviso de resultados,2024-07-15,53.195,Dólar linked
+Vista,ON XXV,Puente,ALyC,Colocador,Aviso de resultados,2024-07-15,53.195,Dólar linked
+Vista,ON XXV,TPCG,ALyC,Colocador,Aviso de resultados,2024-07-15,53.195,Dólar linked
+Vista,ON XXV,Facimex,ALyC,Colocador,Aviso de resultados,2024-07-15,53.195,Dólar linked
+Vista,ON XXV,Global Valores,ALyC,Colocador,Aviso de resultados,2024-07-15,53.195,Dólar linked
+Vista,ON XXVIII,Banco Galicia,Banco,Colocador,Suplemento de prospecto,2025-03-07,92.414,Dólar duro
+Vista,ON XXVIII,Macro Securities,ALyC de un banco,Colocador,Suplemento de prospecto,2025-03-07,92.414,Dólar duro
+Vista,ON XXVIII,Banco Provincia,Banco,Colocador,Suplemento de prospecto,2025-03-07,92.414,Dólar duro
+Vista,ON XXVIII,ICBC,Banco,Colocador,Suplemento de prospecto,2025-03-07,92.414,Dólar duro
+Vista,ON XXVIII,Banco Comafi,Banco,Colocador,Suplemento de prospecto,2025-03-07,92.414,Dólar duro
+Vista,ON XXVIII,Banco Mariva,Banco,Colocador,Suplemento de prospecto,2025-03-07,92.414,Dólar duro
+Vista,ON XXVIII,Banco de Valores,Banco,Colocador,Suplemento de prospecto,2025-03-07,92.414,Dólar duro
+Vista,ON XXVIII,Balanz,ALyC,Colocador,Suplemento de prospecto,2025-03-07,92.414,Dólar duro
+Vista,ON XXVIII,Puente,ALyC,Colocador,Suplemento de prospecto,2025-03-07,92.414,Dólar duro
+Vista,ON XXVIII,TPCG,ALyC,Colocador,Suplemento de prospecto,2025-03-07,92.414,Dólar duro
+Vista,ON XXVIII,Allaria,ALyC,Colocador,Suplemento de prospecto,2025-03-07,92.414,Dólar duro
+Vista,ON XXVIII,SBS Trading,ALyC,Colocador,Suplemento de prospecto,2025-03-07,92.414,Dólar duro
+Vista,ON XXVIII,Invertir en Bolsa,ALyC,Colocador,Suplemento de prospecto,2025-03-07,92.414,Dólar duro
+Vista,ON XXVIII,Facimex,ALyC,Colocador,Suplemento de prospecto,2025-03-07,92.414,Dólar duro
+Vista,ON XXVIII,Global Valores,ALyC,Colocador,Suplemento de prospecto,2025-03-07,92.414,Dólar duro
+Vista,ON XXVIII,Petrini,ALyC,Colocador,Suplemento de prospecto,2025-03-07,92.414,Dólar duro
+Vista,ON XXIX,Banco Galicia,Banco,Colocador local,"Aviso de resultados, 04-06-2025",2025-06-10,900.0,Dólar duro
+Vista,ON XXIX,Banco Santander,Banco,Colocador local,"Aviso de resultados, 04-06-2025",2025-06-10,900.0,Dólar duro
+Vista,ON XXIX,Macro Securities,ALyC de un banco,Colocador local,"Aviso de resultados, 04-06-2025",2025-06-10,900.0,Dólar duro
+Vista,ON XXIX,Balanz,ALyC,Colocador local,"Aviso de resultados, 04-06-2025",2025-06-10,900.0,Dólar duro
+Vista,ON XXIX,Santander US Capital Markets,Banco de inversión del exterior,Comprador inicial,"Aviso de resultados, 04-06-2025",2025-06-10,900.0,Dólar duro
+Vista,ON XXIX,Citigroup Global Markets,Banco de inversión del exterior,Comprador inicial,"Aviso de resultados, 04-06-2025",2025-06-10,900.0,Dólar duro
+Vista,ON XXIX,Itaú BBA USA,Banco de inversión del exterior,Comprador inicial,"Aviso de resultados, 04-06-2025",2025-06-10,900.0,Dólar duro
+YPF,Clase XXXIX,Banco Santander,Banco,Organizador y colocador,Aviso de suscripción,2025-07-15,225.0,Dólar duro
+YPF,Clase XXXIX,Banco Galicia,Banco,Organizador y colocador,Aviso de suscripción,2025-07-15,225.0,Dólar duro
+YPF,Clase XXXIX,Balanz,ALyC,Organizador y colocador,Aviso de suscripción,2025-07-15,225.0,Dólar duro
+YPF,Clase XXXIX,Latin Securities,ALyC,Organizador y colocador,Aviso de suscripción,2025-07-15,225.0,Dólar duro
+YPF,Clase XXXIX,Macro Securities,ALyC de un banco,Colocador,Aviso de suscripción,2025-07-15,225.0,Dólar duro
+YPF,Clase XXXIX,Puente,ALyC,Colocador,Aviso de suscripción,2025-07-15,225.0,Dólar duro
+YPF,Clase XXXIX,Banco Nación,Banco,Colocador,Aviso de suscripción,2025-07-15,225.0,Dólar duro
+YPF,Clase XXXIX,Banco Provincia,Banco,Colocador,Aviso de suscripción,2025-07-15,225.0,Dólar duro
+YPF,Clase XXXIX,TPCG,ALyC,Colocador,Aviso de suscripción,2025-07-15,225.0,Dólar duro
+YPF,Clase XXXIX,Bancor,Banco,Colocador,Aviso de suscripción,2025-07-15,225.0,Dólar duro
+YPF,Clase XXXIX,Allaria,ALyC,Colocador,Aviso de suscripción,2025-07-15,225.0,Dólar duro
+YPF,Clase XXXIX,SBS Trading,ALyC,Colocador,Aviso de suscripción,2025-07-15,225.0,Dólar duro
+YPF,Clase XXXIX,Banco Patagonia,Banco,Colocador,Aviso de suscripción,2025-07-15,225.0,Dólar duro
+YPF,Clase XXXIX,Banco Supervielle,Banco,Colocador,Aviso de suscripción,2025-07-15,225.0,Dólar duro
+YPF,Clase XXXIX,InvertirOnline,Plataforma digital,Colocador,Aviso de suscripción,2025-07-15,225.0,Dólar duro
+YPF,Clase XXXIX,Banco Comafi,Banco,Colocador,Aviso de suscripción,2025-07-15,225.0,Dólar duro
+YPF,Clase XXXIX,Invertir en Bolsa,ALyC,Colocador,Aviso de suscripción,2025-07-15,225.0,Dólar duro
+YPF,Clase XXXIX,Adcap,ALyC,Colocador,Aviso de suscripción,2025-07-15,225.0,Dólar duro
+YPF,Clase XXXIX,Cucchiara,ALyC,Colocador,Aviso de suscripción,2025-07-15,225.0,Dólar duro
+YPF,Clase XLI,Banco Santander,Banco,Organizador y colocador,Suplemento y aviso de resultados,2025-10-08,98.0,Dólar duro
+YPF,Clase XLI,Banco Galicia,Banco,Organizador y colocador,Suplemento y aviso de resultados,2025-10-08,98.0,Dólar duro
+YPF,Clase XLI,Balanz,ALyC,Organizador y colocador,Suplemento y aviso de resultados,2025-10-08,98.0,Dólar duro
+YPF,Clase XLI,Cucchiara,ALyC,Colocador,Suplemento y aviso de resultados,2025-10-08,98.0,Dólar duro
+YPF,Clase XLI,Global Valores,ALyC,Colocador,Suplemento y aviso de resultados,2025-10-08,98.0,Dólar duro
+YPF,Clase XLI,Invertir en Bolsa,ALyC,Colocador,Suplemento y aviso de resultados,2025-10-08,98.0,Dólar duro
+YPF,Clase XLI,Facimex,ALyC,Colocador,Suplemento y aviso de resultados,2025-10-08,98.0,Dólar duro
+YPF,Clase XLI,Adcap,ALyC,Colocador,Suplemento y aviso de resultados,2025-10-08,98.0,Dólar duro
+YPF,Clase XLI,Allaria,ALyC,Colocador,Suplemento y aviso de resultados,2025-10-08,98.0,Dólar duro
+YPF,Clase XLI,SBS Trading,ALyC,Colocador,Suplemento y aviso de resultados,2025-10-08,98.0,Dólar duro
+YPF,Clase XLI,Banco Supervielle,Banco,Colocador,Suplemento y aviso de resultados,2025-10-08,98.0,Dólar duro
+YPF,Clase XLI,InvertirOnline,Plataforma digital,Colocador,Suplemento y aviso de resultados,2025-10-08,98.0,Dólar duro
+YPF,Clase XLI,BBVA,Banco,Colocador,Suplemento y aviso de resultados,2025-10-08,98.0,Dólar duro
+YPF,Clase XLI,Industrial Valores,ALyC,Colocador,Suplemento y aviso de resultados,2025-10-08,98.0,Dólar duro
+YPF,Clase XLI,Banco Patagonia,Banco,Colocador,Suplemento y aviso de resultados,2025-10-08,98.0,Dólar duro
+YPF,Clase XLI,Banco Mariva,Banco,Colocador,Suplemento y aviso de resultados,2025-10-08,98.0,Dólar duro
+YPF,Clase XLI,Macro Securities,ALyC de un banco,Colocador,Suplemento y aviso de resultados,2025-10-08,98.0,Dólar duro

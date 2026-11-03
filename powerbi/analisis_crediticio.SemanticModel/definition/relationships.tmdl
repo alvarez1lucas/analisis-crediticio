@@ -26,3 +26,7 @@ relationship 5d99f58f-0d80-562d-a4d8-ff84d0ddd2d3
 	fromColumn: puente.empresa
 	toColumn: dim_empresa.empresa
 
+relationship e5f5f874-703d-5d49-883d-1c553ca91660
+	fromColumn: colocadores_emision.empresa
+	toColumn: dim_empresa.empresa
+

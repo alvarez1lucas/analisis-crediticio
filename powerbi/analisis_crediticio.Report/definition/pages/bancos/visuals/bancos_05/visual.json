@@ -1,0 +1,50 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "name": "bancos_05",
+  "position": {
+    "x": 646,
+    "y": 466,
+    "z": 500,
+    "height": 64,
+    "width": 610,
+    "tabOrder": 500
+  },
+  "visual": {
+    "visualType": "textbox",
+    "drillFilterOtherVisuals": true,
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Fintech",
+                    "textStyle": {
+                      "fontSize": "12pt",
+                      "color": "#0b0b0b",
+                      "fontFamily": "Segoe UI Semibold"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "No les presta: distribuye. Las plataformas digitales estuvieron en 3 de las 5 ON locales de la muestra.",
+                    "textStyle": {
+                      "fontSize": "10pt",
+                      "color": "#52514e",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

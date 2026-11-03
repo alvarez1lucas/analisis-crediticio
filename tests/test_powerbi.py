@@ -43,7 +43,7 @@ def test_cada_campo_de_cada_visual_existe():
                 else:
                     c = campo["Column"]
                     assert c["Property"] in cols[c["Expression"]["SourceRef"]["Entity"]], (f.parent.name, c)
-    assert total == 36
+    assert total == 43
 
 
 def test_los_nombres_internos_no_se_repiten_dentro_de_un_visual():

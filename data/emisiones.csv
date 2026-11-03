@@ -10,14 +10,14 @@ Vista,ON XXI,2023-08-15,2028-08-15,Dólar linked,,70.0,0.009899999999999999,,,"B
 Vista,ON XXII,2023-12-15,2026-06-15,Dólar duro,,14.669,0.05,,,"BMV 4T 2025, nota 16.1. Mes informado: día aproximado",14.726
 Vista,ON XXIII,2024-03-15,2027-03-15,Dólar duro,,92.203,0.065,,,"BMV 4T 2025, nota 16.1. Mes informado: día aproximado",73.463
 Vista,ON XXIV,2024-05-15,2029-05-15,Dólar duro,,46.562,0.08,,,"BMV 4T 2025, nota 16.1. Mes informado: día aproximado",46.942
-Vista,ON XXV,2024-07-15,2028-07-15,Dólar linked,,53.195,0.03,,,"BMV 4T 2025, nota 16.1. Mes informado: día aproximado",53.239
+Vista,ON XXV,2024-07-15,2028-07-15,Dólar linked,,53.195,0.03,,Banco Santander; Banco Galicia; Macro Securities; Banco Comafi; Banco Mariva; Balanz; Puente; TPCG; Facimex; Global Valores,"BMV 4T 2025, nota 16.1. Mes informado: día aproximado",53.239
 Vista,ON XXVI,2024-10-15,2031-10-15,Dólar duro,,150.0,0.0765,,,"BMV 4T 2025, nota 16.1. Mes informado: día aproximado",151.747
 Vista,ON XXVII,2024-12-15,2035-12-15,Dólar duro,,600.0,0.07629999999999999,,,"BMV 4T 2025, nota 16.1. Mes informado: día aproximado",597.954
-Vista,ON XXVIII,2025-03-15,2030-03-15,Dólar duro,,92.414,0.075,,,"BMV 4T 2025, nota 16.1. Mes informado: día aproximado",94.038
-Vista,ON XXIX,2025-06-15,2033-06-15,Dólar duro,,900.0,0.085,,,"BMV 4T 2025, nota 16.1. Mes informado: día aproximado",899.341
+Vista,ON XXVIII,2025-03-07,2030-03-15,Dólar duro,,92.414,0.075,,Banco Galicia; Macro Securities; Banco Provincia; ICBC; Banco Comafi; Banco Mariva; Banco de Valores; Balanz; Puente; TPCG; Allaria; SBS Trading; Invertir en Bolsa; Facimex; Global Valores; Petrini,"BMV 4T 2025, nota 16.1. Mes informado: día aproximado. Fechas exactas: Aviso de resultados XXVIII",94.038
+Vista,ON XXIX,2025-06-10,2033-06-10,Dólar duro,,900.0,0.085,0.085,Banco Galicia; Banco Santander; Macro Securities; Balanz,"BMV 4T 2025, nota 16.1. Mes informado: día aproximado. Fechas exactas: Aviso de resultados XXIX: rendimiento 8,50%, amortiza en 3 cuotas",899.341
 Vista,ON XXX,2025-10-15,2027-04-15,Dólar duro,,73.256,0.06,,,"BMV 4T 2025, nota 16.1. Mes informado: día aproximado",73.796
 Pampa,Clase 23 (reapertura),2025-05-28,2034-12-15,Dólar duro,,340.0,0.07875,0.08,,"20-F 2025, nota 12.5.4. Vence en dic-34: día aproximado",
-Pampa,Clase 25,2025-08-06,2028-08-06,Dólar duro,,104.6,0.0725,,,"20-F 2025, nota 12.5.4",107.0
+Pampa,Clase 25,2025-08-06,2028-08-06,Dólar duro,,104.6,0.0725,,Banco Galicia; Banco Patagonia; Cocos Capital; Banco Mariva; Balanz; SBS Trading; Allaria; Adcap; Petrini; Latin Securities; Banco Provincia,"20-F 2025, nota 12.5.4",107.0
 Pampa,Clase 26,2025-11-14,2037-11-15,Dólar duro,,450.0,0.0775,0.08125,,"20-F 2025, nota 12.5.4. Vence en nov-37: día aproximado",437.0
 YPF,Clase XVII,2021-02-15,2029-07-01,Dólar duro,,748.0,0.09,,,"20-F 2025, nota 22. Mes informado: día aproximado. Vence: sólo se informa el año",753.0
 YPF,Clase XVIII,2021-02-15,2033-07-01,Dólar duro,,576.0,0.07,,,"20-F 2025, nota 22. Mes informado: día aproximado. Vence: sólo se informa el año",569.0
@@ -34,10 +34,10 @@ YPF,Clase XXXI,2024-09-15,2031-07-01,Dólar duro,,540.0,0.0875,,,"20-F 2025, not
 YPF,Clase XXXII,2024-10-15,2028-07-01,Dólar duro,,125.0,0.065,,,"20-F 2025, nota 22. Mes informado: día aproximado. Vence: sólo se informa el año",127.0
 YPF,Clase XXXIII,2024-10-15,2028-07-01,Dólar duro,,25.0,0.07,,,"20-F 2025, nota 22. Mes informado: día aproximado. Vence: sólo se informa el año",25.0
 YPF,Clase XXXIV,2025-01-15,2034-07-01,Dólar duro,,1100.0,0.0825,,,"20-F 2025, nota 22. Mes informado: día aproximado. Vence: sólo se informa el año",1122.0
-YPF,Clase XXXV,2025-02-15,2027-07-01,Dólar duro,,140.0,0.0625,,,"20-F 2025, nota 22. Mes informado: día aproximado. Vence: sólo se informa el año",141.0
+YPF,Clase XXXV,2025-02-15,2027-02-27,Dólar duro,,140.0,0.0625,,,"20-F 2025, nota 22. Mes informado: día aproximado. Vence: sólo se informa el año. Fechas exactas: Aviso de resultados XXXV",141.0
 YPF,Clase XXXVII,2025-05-15,2027-07-01,Dólar duro,,140.0,0.07,,,"20-F 2025, nota 22. Mes informado: día aproximado. Vence: sólo se informa el año",141.0
-YPF,Clase XXXVIII,2025-07-15,2027-07-01,Dólar duro,,250.0,0.075,,,"20-F 2025, nota 22. Mes informado: día aproximado. Vence: sólo se informa el año",252.0
-YPF,Clase XXXIX,2025-07-15,2030-07-01,Dólar duro,,225.0,0.0875,,,"20-F 2025, nota 22. Mes informado: día aproximado. Vence: sólo se informa el año",163.0
-YPF,Clase XL,2025-08-15,2028-07-01,Dólar duro,,51.0,0.075,,,"20-F 2025, nota 22. Mes informado: día aproximado. Vence: sólo se informa el año",50.0
-YPF,Clase XLI,2025-10-15,2027-07-01,Dólar duro,,98.0,0.06,,,"20-F 2025, nota 22. Mes informado: día aproximado. Vence: sólo se informa el año",99.0
+YPF,Clase XXXVIII,2025-07-15,2027-07-22,Dólar duro,,250.0,0.075,,,"20-F 2025, nota 22. Mes informado: día aproximado. Vence: sólo se informa el año. Fechas exactas: Suplemento XLI",252.0
+YPF,Clase XXXIX,2025-07-15,2030-07-22,Dólar duro,,225.0,0.0875,,Banco Santander; Banco Galicia; Balanz; Latin Securities; Macro Securities; Puente; Banco Nación; Banco Provincia; TPCG; Bancor; Allaria; SBS Trading; Banco Patagonia; Banco Supervielle; InvertirOnline; Banco Comafi; Invertir en Bolsa; Adcap; Cucchiara,"20-F 2025, nota 22. Mes informado: día aproximado. Vence: sólo se informa el año. Fechas exactas: Suplemento XLI",163.0
+YPF,Clase XL,2025-08-15,2028-08-28,Dólar duro,,51.0,0.075,,,"20-F 2025, nota 22. Mes informado: día aproximado. Vence: sólo se informa el año. Fechas exactas: Suplemento XLI",50.0
+YPF,Clase XLI,2025-10-08,2027-01-08,Dólar duro,,98.0,0.06,,Banco Santander; Banco Galicia; Balanz; Cucchiara; Global Valores; Invertir en Bolsa; Facimex; Adcap; Allaria; SBS Trading; Banco Supervielle; InvertirOnline; BBVA; Industrial Valores; Banco Patagonia; Banco Mariva; Macro Securities,"20-F 2025, nota 22. Mes informado: día aproximado. Vence: sólo se informa el año. Fechas exactas: Aviso de resultados XLI",99.0
 YPF,Clase XLII,2025-12-15,2027-07-01,Dólar duro,,195.0,0.07,,,"20-F 2025, nota 22. Mes informado: día aproximado. Vence: sólo se informa el año",195.0

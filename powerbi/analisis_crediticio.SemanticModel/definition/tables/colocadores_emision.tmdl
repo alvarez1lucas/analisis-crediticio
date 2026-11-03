@@ -1,0 +1,93 @@
+table colocadores_emision
+	lineageTag: dd1944d5-fe2e-5869-96fd-87af53622169
+
+	column empresa
+		dataType: string
+		lineageTag: 50de05e3-5034-5661-b166-849d4e286adb
+		summarizeBy: none
+		sourceColumn: empresa
+
+		annotation SummarizationSetBy = Automatic
+
+	column clase
+		dataType: string
+		lineageTag: 6716cb4a-f6b5-5d62-b09c-a662f831c449
+		summarizeBy: none
+		sourceColumn: clase
+
+		annotation SummarizationSetBy = Automatic
+
+	column fecha
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: 76248570-8a8f-58d0-8a41-97f5dc4d8b8b
+		summarizeBy: none
+		sourceColumn: fecha
+
+		annotation SummarizationSetBy = Automatic
+
+	column monto
+		dataType: double
+		lineageTag: 56be840b-f52d-5a71-9b99-84dc55dc491c
+		summarizeBy: none
+		sourceColumn: monto
+
+		annotation SummarizationSetBy = Automatic
+
+	column instrumento
+		dataType: string
+		lineageTag: ae6e1a8d-28db-5064-add5-360dd1447374
+		summarizeBy: none
+		sourceColumn: instrumento
+
+		annotation SummarizationSetBy = Automatic
+
+	column bancos
+		dataType: int64
+		lineageTag: 89199612-4c07-5f80-9e30-fe31d73da820
+		summarizeBy: none
+		sourceColumn: bancos
+
+		annotation SummarizationSetBy = Automatic
+
+	column alycs
+		dataType: int64
+		lineageTag: 62f40c55-8e4e-5df8-8c09-de6b50122611
+		summarizeBy: none
+		sourceColumn: alycs
+
+		annotation SummarizationSetBy = Automatic
+
+	column plataformas_digitales
+		dataType: int64
+		lineageTag: dfcfb368-6fed-577d-bf66-2674b094a76a
+		summarizeBy: none
+		sourceColumn: plataformas_digitales
+
+		annotation SummarizationSetBy = Automatic
+
+	column bancos_exterior
+		dataType: int64
+		lineageTag: 0af443f5-5ce8-5929-a1d7-36f3855bbd7d
+		summarizeBy: none
+		sourceColumn: bancos_exterior
+
+		annotation SummarizationSetBy = Automatic
+
+	column entidades
+		dataType: int64
+		lineageTag: ff0919e3-feea-51a1-84a1-ab7d7ee7d02c
+		summarizeBy: none
+		sourceColumn: entidades
+
+		annotation SummarizationSetBy = Automatic
+
+	partition colocadores_emision = m
+		mode: import
+		source =
+				let
+				    Origen = Csv.Document(File.Contents(RutaDatos & "\outputs\colocadores_emision.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Encabezados = Table.PromoteHeaders(Origen, [PromoteAllScalars = true]),
+				    Resultado = Table.TransformColumnTypes(Encabezados, {{"empresa", type text}, {"clase", type text}, {"fecha", type date}, {"monto", type number}, {"instrumento", type text}, {"bancos", Int64.Type}, {"alycs", Int64.Type}, {"plataformas_digitales", Int64.Type}, {"bancos_exterior", Int64.Type}, {"entidades", Int64.Type}}, "en-US")
+				in
+				    Resultado

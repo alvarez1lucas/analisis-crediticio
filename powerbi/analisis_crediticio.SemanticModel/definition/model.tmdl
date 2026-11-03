@@ -20,6 +20,8 @@ ref table rating
 ref table mercado
 ref table vencimientos
 ref table puente
+ref table colocadores_entidad
+ref table colocadores_emision
 ref table Medidas
 
 ref cultureInfo en-US

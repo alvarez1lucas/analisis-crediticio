@@ -81,6 +81,10 @@ table Medidas
 		formatString: #,0
 		lineageTag: 408d939b-d650-56bf-8d6c-ddf115614460
 
+	measure Participaciones = SUM(colocadores_entidad[emisiones])
+		formatString: 0
+		lineageTag: 92edf579-fe6d-5067-b8fa-bc06c032f6f8
+
 	column _
 		dataType: string
 		isHidden
