@@ -86,3 +86,12 @@ def test_modelo_de_instrumento():
     assert m["coeficiente_por_1000_pb"] > 0 and m["p_valor"] < 0.05
     assert m["probabilidad_con_700"] < m["probabilidad_con_1500"] < m["probabilidad_con_2500"]
     assert m["emisiones"] == 42
+
+
+def test_el_sitio_sale_en_ingles_y_en_espanol_sin_huecos():
+    from empresas import sitio
+    sitio.main()
+    for ruta, idioma in (("index.html", "en"), ("es/index.html", "es"), ("memo.html", "en"), ("es/memo.html", "es")):
+        html = (sitio.SITIO / ruta).read_text(encoding="utf-8")
+        assert f'<html lang="{idioma}">' in html
+        assert not re.search(r"\bnan\b|\bNone\b", html), ruta

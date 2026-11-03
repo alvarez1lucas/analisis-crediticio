@@ -47,7 +47,8 @@ def cifras() -> dict:
                         pesos=t_anio.doc_ars.mean(), pf_pesos=t_anio.pf_ars.mean()),
         "colocacion": dict(emisiones=len(col), locales=len(locales), entidades_locales=locales.entidades.mean(),
                            con_plataforma=int((locales.plataformas_digitales > 0).sum()), siempre=ent[ent.emisiones == len(col)].entidad.tolist(),
-                           exterior=col[col.bancos_exterior > 0][["empresa", "clase", "monto"]].values.tolist()),
+                           exterior=col[col.bancos_exterior > 0][["empresa", "clase", "monto"]].values.tolist(),
+                           locales_ext=int(col[col.bancos_exterior > 0].eval("bancos + alycs + plataformas_digitales").sum())),
         "modelo": m,
         "pesos": {e: (b[e]["m_pesos"] / (b[e]["deuda_cp"] + b[e]["deuda_lp"])) if b[e].get("m_pesos") is not None else None for e in p.EMPRESAS},
     }
@@ -99,7 +100,7 @@ Los préstamos de YPF y de Pampa no tienen detalle por crédito: YPF informa ran
 - **Prestar queda para el corto plazo:** con tasa activa en dólares de {pct(si['credito'] / 100, 1)} y plazo fijo en dólares de {pct(si['pf'] / 100, 1)} en {anio},
   el margen bruto fue de unos {num(si['credito'] - si['pf'], 1)} puntos. A más plazo, la empresa prefiere la ON.
 - **En una ON internacional, el banco local sólo distribuye:** la emisión más grande de la muestra, {ext}, tuvo bancos de inversión del exterior
-  como compradores iniciales y sólo {x['colocacion'].get('locales_ext', 4)} colocadores locales.
+  como compradores iniciales y sólo {co['locales_ext']} colocadores locales.
 - **Qué mirar antes de prestar:** el muro de vencimientos y cuánto cubre la caja. Con su caja, Pampa paga lo que vence hasta
   {d['vencimientos']['Pampa']['primer_hueco'] - 1}; YPF no cubre ni {p.PROYECCION[0]}.
 
@@ -119,12 +120,82 @@ Los préstamos de YPF y de Pampa no tienen detalle por crédito: YPF informa ran
 """
 
 
+SALIDA_EN = p.ROOT / "docs" / "instrument_guide.md"
+
+
+def write_en(x: dict, d: dict) -> str:
+    """The same guide in English, with the same figures."""
+    du, li, da, bf, bs, si, co = x["duro"], x["linked"], x["duro_anio"], x["banco_fija"], x["banco_sofr"], x["sistema"], x["colocacion"]
+    pct, num = memo.percent, memo.number
+    year = p.ANIOS[-1]
+    ext = "; ".join(f"{e} {c} (US$ {num(m, 0)} M)" for e, c, m in co["exterior"])
+    return f"""# Decision guide: bonds or loans, in dollars or in pesos?
+
+**For:** corporate banking and fintech analysts · **Base:** {du['n'] + li['n']} corporate bonds (ON) from Pampa, YPF and Vista (2021-{year}), their loans at year-end {year}
+and financial-system rates. It describes what these three companies did; it is not a rule for any issuer.
+
+## What the data show
+
+| Instrument | Cases | Amount (US$ M) | Average tenor | Average rate | Country risk at issue |
+|---|---|---|---|---|---|
+| Hard-dollar bond | {du['n']} | {num(du['monto'], 0)} | {num(du['plazo'])} years | {pct(du['tasa'], 1)} | {num(du['rp'], 0)} bp |
+| Dollar-linked bond | {li['n']} | {num(li['monto'], 0)} | {num(li['plazo'])} years | {pct(li['tasa'], 1)} | {num(li['rp'], 0)} bp |
+| Fixed-rate bank loan (Vista) | {bf['n']} | {num(bf['saldo'], 0)} | {num(bf['plazo'])} years | {pct(bf['tasa'], 1)} | n.a. |
+| SOFR bank loan (Vista) | {bs['n']} | {num(bs['saldo'], 0)} | {num(bs['plazo'])} years | SOFR + {pct(bs['margen'], 1)} | n.a. |
+| System lending to companies, {year} | monthly average | n.a. | up to 89 days: {pct(si['corto'] / 100, 1)} · 90 days or more: {pct(si['largo'] / 100, 1)} | {pct(si['credito'] / 100, 1)} | n.a. |
+
+Amounts and rates weighted by amount. Bond rates are the issue yield when reported and the coupon otherwise.
+YPF and Pampa do not detail their loans one by one: YPF reports ranges (pre-financing from 3.50% to 8.65%; dollar loans from 2.40% to 11.00%).
+
+## When each one fits
+
+### For the company
+
+- **Hard-dollar bonds, when country risk falls.** They were issued with country risk from {num(du['rp_min'], 0)} points. In {year}, hard-dollar bonds
+  priced at {pct(da['tasa'], 1)} and {num(da['plazo'])} years on average, {num(-da['prima'], 0)} points below that day's country risk on average.
+- **Dollar-linked bonds, when country risk is high.** None was issued below {num(li['rp_min'], 0)} points. They pay almost nothing in dollars
+  ({pct(li['tasa'], 1)} on average) because local investors want currency protection, but they are short ({num(li['plazo'])} years) and settle in pesos.
+  The model estimates a {pct(x['modelo']['probabilidad_con_2000'])} probability of choosing them at 2,000 points and {pct(x['modelo']['probabilidad_con_700'])} at 700.
+- **Bank loans, for short tenors or amounts too small for a bond.** At year-end {year}, Vista owed US$ {num(bf['saldo'] + bs['saldo'], 0)} M
+  to banks, with tenors of {num(bf['plazo'])} years at a fixed rate and {num(bs['plazo'])} years over SOFR, while its bonds reached 8 years.
+- **Export pre-financing, for an exporter that needs dollar working capital.** It is tied to export receipts, so banks see it as less risky
+  than a plain loan. Pampa used it and repaid it within {year}.
+- **Pesos, only for short working capital.** In {year}, peso lending to companies cost {pct(si['pesos'] / 100, 0)} on average, against
+  {pct(si['credito'] / 100, 1)} in dollars. These companies barely borrow in pesos: {pct(x['pesos']['YPF'], 1)} of YPF's debt and none at Pampa and Vista.
+
+### For the bank
+
+- **Underwriting is recurrent:** {' and '.join(co['siempre'])} took part in all {co['emisiones']} placements in the sample. A local bond gathers
+  {num(co['entidades_locales'], 0)} placement agents on average: the bank that places does not take the credit risk, it distributes it among investors and keeps the relationship.
+- **Lending stays short:** with a dollar lending rate of {pct(si['credito'] / 100, 1)} and dollar time deposits at {pct(si['pf'] / 100, 1)} in {year},
+  the gross margin was about {num(si['credito'] - si['pf'], 1)} points. For longer tenors, the company prefers a bond.
+- **In an international bond, the local bank only distributes:** the largest placement in the sample, {ext}, had foreign investment banks
+  as initial purchasers and only {co['locales_ext']} local placement agents.
+- **What to check before lending:** the maturity wall and how much of it cash covers. With its cash, Pampa covers maturities until
+  {d['vencimientos']['Pampa']['primer_hueco'] - 1}; YPF does not cover {p.PROYECCION[0]}.
+
+### For a fintech
+
+- **It does not lend to these companies:** their size and tenors are beyond what a fintech competes for.
+- **It distributes bonds to retail investors:** digital platforms took part in {co['con_plataforma']} of the {co['locales']} local bonds in the sample,
+  all from {year}. It is how savers reach a corporate bond.
+- **It uses them to invest its own or its clients' cash:** a {year} hard-dollar bond yielded {num(100 * da['tasa'] - si['pf'], 1)} points more than a dollar
+  time deposit, in exchange for tenor and credit risk. What to measure is the same as a bank: rating, maturities and covenants.
+
+## Limits
+
+- These are three large companies in the same sector. A small company has no access to international bonds and depends much more on banks.
+- The placement-agent sample covers {co['emisiones']} of {du['n'] + li['n']} bonds: those with a results notice or prospectus supplement available.
+- The system rate is an average for non-SME companies at a fixed rate: a reference, not these companies' cost.
+"""
+
+
 def main() -> None:
     x = cifras()
-    col = pd.read_csv(OUTPUTS / "colocadores_emision.csv")
-    x["colocacion"]["locales_ext"] = int(col[col.bancos_exterior > 0].eval("bancos + alycs + plataformas_digitales").iloc[0]) if (col.bancos_exterior > 0).any() else 0
-    SALIDA.write_text(escribir(x, memo.leer()), encoding="utf-8", newline="\n")
-    print(f"{SALIDA.name} escrito")
+    d = memo.leer()
+    SALIDA.write_text(escribir(x, d), encoding="utf-8", newline="\n")
+    SALIDA_EN.write_text(write_en(x, d), encoding="utf-8", newline="\n")
+    print(f"{SALIDA.name} y {SALIDA_EN.name} escritos")
 
 
 if __name__ == "__main__":

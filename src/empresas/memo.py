@@ -176,6 +176,108 @@ capex igual a la depreciación. Peor año de cada indicador:
 """
 
 
+SALIDA_EN = p.ROOT / "docs" / "credit_memo.md"
+ZONA_EN = {"segura": "safe", "gris": "grey", "de riesgo": "distress"}
+
+
+def number(x: float, decimals: int = 1) -> str:
+    return f"{x:,.{decimals}f}"
+
+
+def times(x, decimals: int = 1) -> str:
+    return f"{number(x, decimals)}x" if isinstance(x, (int, float)) else str(x)
+
+
+def percent(x, decimals: int = 0) -> str:
+    return f"{number(100 * x, decimals)}%" if isinstance(x, (int, float)) else str(x)
+
+
+def write_en(d: dict) -> str:
+    """The same memo in English, with the same figures."""
+    pa, yp, vi = d["Pampa"], d["YPF"], d["Vista"]
+    r = lambda e, n: e["ratio"][n]
+    cap = capacidad(pa)
+    line = 10 * int(PARTE_DEL_BANCO * cap // 10)
+    sup = d["supuestos"]
+    names = {"Margen EBITDA": "EBITDA margin", "Deuda neta / EBITDA": "Net debt / EBITDA", "EBITDA / intereses": "EBITDA / interest",
+             "Liquidez corriente": "Current ratio", "Flujo libre / deuda": "Free cash flow / debt", "ON / deuda financiera": "Bonds / financial debt",
+             "Costo medio de la deuda": "Average cost of debt", "Altman Z'' mercados emergentes": "Altman Z'' emerging markets"}
+    fmt = {"Margen EBITDA": percent, "Flujo libre / deuda": percent, "ON / deuda financiera": percent, "Costo medio de la deuda": lambda x: percent(x, 1)}
+    peers = "\n".join(f"| {en} | " + " | ".join(fmt.get(es, times)(e["ratio"][es]) for e in (pa, yp, vi)) + " |" for es, en in names.items())
+    ve = d["vencimientos"]["Pampa"]
+    yields = [x[2] for x in d["emisiones_pampa"]]
+    short = min(d["emisiones_pampa"], key=lambda x: x[1])
+    zones = {e: ZONA_EN[zona_altman(x["ratio"]["Altman Z'' mercados emergentes"])] for e, x in (("Pampa", pa), ("YPF", yp), ("Vista", vi))}
+    safe = [e for e, z in zones.items() if z == "safe"]
+    rest = [e for e in zones if e not in safe]
+    altman = f"{' and '.join(safe)}'s Altman Z'' is in the safe zone" + (f"; {' and '.join(rest)}'s, in the {zones[rest[0]]} zone." if rest else ".")
+    stress = "\n".join(f"| {e} | {times(max(x['estres']['apal']))} | {times(min(x['estres']['cob']))} | {times(min(x['estres']['dscr']), 2)} | {x['nota']} → {x['nota_estres']} |"
+                       for e, x in (("Pampa", pa), ("YPF", yp), ("Vista", vi)))
+    ypf = d["vencimientos"]["YPF"]
+    return f"""# Credit memo: Pampa Energía S.A.
+
+**To:** Credit committee, corporate banking · **Data:** 2023-2025 financial statements in US dollars (2025 20-F) · **Model:** [excel/analisis_crediticio.xlsx](../excel/analisis_crediticio.xlsx)
+
+## Recommendation
+
+**Approve a facility of up to US$ {number(line, 0)} M, 3 years, in US dollars**, preferably as export pre-financing or an amortizing loan,
+with covenants of net debt / EBITDA ≤ {times(d['covenants']['apal'])} and EBITDA / interest ≥ {times(d['covenants']['cob'])}.
+
+- **Why yes:** net debt / EBITDA of {times(r(pa, 'Deuda neta / EBITDA'))}, a current ratio of {times(r(pa, 'Liquidez corriente'))} and cash and investments of
+  US$ {number(pa['linea']['caja'] + pa['linea']['inv_cp'], 0)} M. Internal rating **{pa['nota']}** (score {number(pa['puntaje'], 2)} out of 5).
+- **How much:** in the stress scenario, Pampa could add US$ {number(cap, 0)} M of debt without exceeding {times(LIMITE_INTERNO)} net debt / EBITDA in any year.
+  The proposed facility is {percent(line / cap)} of that capacity.
+- **Why not more:** free cash flow was negative in all three years (US$ {', '.join(number(x, 0) for x in pa['fcf_3'])} M) and 2025 debt service coverage was
+  {times(r(pa, 'Cobertura de servicio de deuda'), 2)}: Pampa repays maturities with new debt, not with its own cash.
+
+## Peer comparison (2025)
+
+| Metric | Pampa | YPF | Vista |
+|---|---|---|---|
+{peers}
+
+Pampa is the least profitable of the three, but the least leveraged and the most liquid. {altman}
+
+## Funding
+
+- **It relies on the capital market:** {percent(r(pa, 'ON / deuda financiera'))} of its debt is corporate bonds (obligaciones negociables, ON) and only US$ {number(pa['linea']['d_bancos'], 0)} M is loans.
+  All of its 2025 debt is in dollars and at a fixed rate.
+- **It borrows below the sovereign:** its {len(yields)} placements in {p.ANIOS[-1]} yielded between {percent(min(yields), 2)} and {percent(max(yields), 3)}, below that day's country risk (Emisiones sheet).
+- **What a bank adds:** short-term liquidity and export pre-financing, where bonds do not compete. For long tenors, the company chooses the market.
+- **Pricing reference:** its {short[0]} bond was placed at {number(short[1], 0)} years at {percent(short[2], 2)}. A facility of similar tenor has to compete with that rate.
+
+## Stress scenario (2026-2028)
+
+Assumptions: sales {percent(sup['caida'])} in 2026 with no recovery, EBITDA margin {number(100 * sup['margen'], 0)} pp lower, refinanced debt {number(100 * sup['tasa'], 0)} pp more expensive
+and capex equal to depreciation. Worst year of each metric:
+
+| Company | Net debt / EBITDA | EBITDA / interest | Debt service coverage | Internal rating |
+|---|---|---|---|---|
+{stress}
+
+- **Pampa does not breach the assumed covenants, even under stress**, and in the base case its EBITDA could fall {percent(d['covenants']['margen']['Pampa'])} before reaching
+  {times(d['covenants']['apal'])} net debt / EBITDA.
+- **The real risk is refinancing, but it is not immediate:** under stress, debt service coverage falls to {times(min(pa['estres']['dscr']), 2)}.
+  Even so, with its 2025 cash (US$ {number(ve['caja'], 0)} M) Pampa can repay everything maturing until {ve['primer_hueco'] - 1} even if the market closes.
+  YPF is in the opposite position: US$ {number(ypf['primer_anio'], 0)} M matures in {p.PROYECCION[0]}, {times(ypf['primer_anio'] / ypf['caja'])} its cash.
+
+## Proposed terms
+
+1. Maintenance covenants: net debt / EBITDA ≤ {times(d['covenants']['apal'])} and EBITDA / interest ≥ {times(d['covenants']['cob'])}, tested semi-annually.
+2. Cross-default with outstanding bonds.
+3. If pre-financing, assignment of export receivables.
+4. Annual review, or earlier if country risk exceeds its 2023 level.
+
+## Risks and limits of the analysis
+
+- **Sovereign and transfer risk:** the company borrows below country risk, but operates in Argentina. This internal rating applies no sovereign ceiling.
+- **Maturity concentration:** Pampa repays little until {p.PROYECCION[-1]}, then large blocks mature:
+  {', '.join(f'US$ {number(m, 0)} M in {a}' for a, m in ve['mayores'].items())} (20-F note 12.5.2). The proposed facility matures before those blocks.
+- **Stated assumptions:** the covenants, the {times(LIMITE_INTERNO)} internal limit and the bank's share ({percent(PARTE_DEL_BANCO)}) are assumptions, not contract data.
+- **Own figures:** EBITDA excludes one-off results and associates, so it differs from the adjusted EBITDA the company reports.
+"""
+
+
 def exportar(d: dict) -> None:
     """Rating y proyección a outputs/, para el tablero: las mismas cifras que el memo."""
     import pandas as pd
@@ -207,6 +309,7 @@ def exportar(d: dict) -> None:
 def main() -> None:
     d = leer()
     SALIDA.write_text(escribir(d), encoding="utf-8", newline="\n")
+    SALIDA_EN.write_text(write_en(d), encoding="utf-8", newline="\n")
     exportar(d)
     print(f"{SALIDA.name} escrito; rating y proyección exportados a outputs/")
 

@@ -1,21 +1,24 @@
-# Análisis crediticio de empresas
+# Corporate credit analysis: bonds or bank loans?
 
-¿Cuándo conviene una obligación negociable y cuándo un crédito, y qué lugar le queda al banco? Estudio de Pampa Energía, YPF y Vista sobre sus 20-F, avisos de resultados y series de mercado. El diseño está en [docs/diseno.md](docs/diseno.md); la conclusión, en el [memo de crédito](docs/memo_credito.md), y cuándo conviene cada instrumento, en la [guía de decisión](docs/guia_instrumentos.md).
+When does a corporate bond beat a bank loan, and what role is left for banks and fintechs? A credit file on Pampa Energía, YPF and Vista built from their
+audited US-dollar financial statements, bond results notices and market data. The conclusion is in the [credit memo](docs/credit_memo.md) and the
+[decision guide](docs/instrument_guide.md). [Versión en español](README_ES.md).
 
-**Sitio:** [alvarez1lucas.github.io/analisis-crediticio](https://alvarez1lucas.github.io/analisis-crediticio/) · **Tablero de Power BI:** [powerbi/analisis_crediticio.pbix](powerbi/analisis_crediticio.pbix) · **Modelo:** [excel/analisis_crediticio.xlsx](excel/analisis_crediticio.xlsx)
+**Site:** [alvarez1lucas.github.io/analisis-crediticio](https://alvarez1lucas.github.io/analisis-crediticio/) · **Power BI dashboard:** [powerbi/analisis_crediticio.pbix](powerbi/analisis_crediticio.pbix) · **Model:** [excel/analisis_crediticio.xlsx](excel/analisis_crediticio.xlsx)
 
-**Stack:** Excel, SQL con DuckDB, Python (pandas, statsmodels), Plotly, Power BI, pytest, GitHub Actions, GitHub Pages.
+**Stack:** Excel, SQL with DuckDB, Python (pandas, statsmodels), Plotly, Power BI, pytest, GitHub Actions, GitHub Pages.
 
-## Qué tiene
+## What it covers
 
-- **Balances:** Pampa, YPF y Vista, 2023 a 2025, cargados desde sus estados contables en dólares, con controles de cuadre contra lo informado.
-- **Deuda:** 42 obligaciones negociables y 25 créditos, con riesgo país, Tesoro de EE.UU. y tasa bancaria del momento de cada emisión.
-- **Análisis:** rating interno, proyección 2026-2028 con escenario de estrés, covenants y regresión logística sobre la elección de instrumento.
-- **Deuda y mercado:** muro de vencimientos, puente del EBITDA al flujo libre, DuPont y colocadores de cada ON (bancos, ALyC y plataformas digitales).
-- **Controles:** 34 tests; SQL, Excel y Power BI dan las mismas cifras.
+- **Balance sheets:** Pampa, YPF and Vista, 2023-2025, loaded from their financial statements with checks against reported totals; ratios, vertical analysis, sources and uses, DuPont and Altman Z''.
+- **Debt:** 42 corporate bonds and 25 loans, each bond matched with that day's country risk, US Treasury yield and the monthly bank lending rate; maturity wall at end-2025.
+- **Credit:** internal rating, 2026-2028 projection with a stress scenario, covenant headroom and a credit memo with a facility recommendation.
+- **Funding choices:** logistic regression of dollar-linked versus hard-dollar issuance on country risk, and placement agents of each bond (banks, brokers and digital platforms).
+- **Controls:** a pytest suite; SQL, Excel and Power BI return the same figures.
 
-## Cómo correrlo
+## How to run it
 
-`pip install -r requirements.txt` y, con `PYTHONPATH=src`: `empresas.mercado` (series), `empresas.plantilla` (Excel), `empresas.sql` (capa SQL en `sql/`),
-`empresas.tendencias` (modelo), `empresas.memo` (memo y exportaciones), `empresas.guia` (guía), `empresas.sitio` (sitio) y `empresas.powerbi` (tablero).
-GitHub Actions actualiza el mercado cada lunes. Los balances están en `data/balances.csv` y se actualizan cuando sale un nuevo 20-F.
+`pip install -r requirements.txt` and, with `PYTHONPATH=src`: `empresas.mercado` (market data), `empresas.plantilla` (Excel), `empresas.sql` (SQL layer in `sql/`),
+`empresas.tendencias` (model), `empresas.memo` (memo and exports), `empresas.guia` (guide), `empresas.sitio` (site) and `empresas.powerbi` (dashboard).
+GitHub Actions refreshes market data every Monday. Financial statements live in `data/balances.csv` and are updated when a new 20-F is filed.
+The Excel model and the Power BI dashboard are in Spanish; the site, memo and guide are in English and Spanish.
