@@ -35,8 +35,9 @@ REFERENCIAS = ["SOFR", "BADLAR", "TAMAR", "Otra", "Ninguna"]
 FILAS_CREDITOS = 100
 FILAS_EMISIONES = 150
 EMPRESAS = ["Pampa", "YPF", "Vista"]
-ANIOS = [2021, 2022, 2023, 2024, 2025]
-COLUMNAS = "BCDEF"
+ANIOS = [2023, 2024, 2025]  # los tres años que los 20-F 2025 informan en dólares y auditados
+COLUMNAS = "BCD"
+AYUDA = "E"
 AZUL, VERDE, GRIS = "#0000FF", "#008000", "#52514E"
 ENCABEZADO, LINEA, RESALTE = "#2A78D6", "#E1E0D9", "#FFFF00"
 COLOR_EMPRESA = {"Pampa": "#2A78D6", "YPF": "#1BAF7A", "Vista": "#EDA100"}
@@ -257,7 +258,7 @@ def construir(archivo: Path, valores: dict, mercado: pd.DataFrame, balances: dic
     g.write(fila, 0, "Años cargados", fmt(bold=True, font_size=12, font_color=ENCABEZADO))
     for i, e in enumerate(EMPRESAS):
         g.write(fila + 1 + i, 0, e, fmt(bold=True))
-        formula(g, f"B{fila + 2 + i}", f"COUNTIF('{e}'!$B${FILAS['estado']}:$F${FILAS['estado']},\"OK\")&\" de {len(ANIOS)} con Estado OK\"", font_color=VERDE)
+        formula(g, f"B{fila + 2 + i}", f"COUNTIF('{e}'!$B${FILAS['estado']}:${COLUMNAS[-1]}${FILAS['estado']},\"OK\")&\" de {len(ANIOS)} con Estado OK\"", font_color=VERDE)
 
     # --- Empresas
     celda = dict(font_color=AZUL, bg_color=RESALTE, border=1, border_color=LINEA, num_format="#,##0.0;(#,##0.0);0.0")
@@ -265,8 +266,8 @@ def construir(archivo: Path, valores: dict, mercado: pd.DataFrame, balances: dic
     for e in EMPRESAS:
         h = nueva_hoja(e, f"{e}: carga de estados contables", "Millones de dólares. Completá sólo las celdas azules sobre amarillo.", COLOR_EMPRESA[e])
         h.set_column("A:A", 38)
-        h.set_column("B:F", 12)
-        h.set_column("G:G", 62)
+        h.set_column(f"B:{COLUMNAS[-1]}", 12)
+        h.set_column(f"{AYUDA}:{AYUDA}", 62)
         h.write("A4", "Tolerancia del control (US$ M)", fmt())
         h.write("B4", 2, fmt(**celda))
         h.write("A5", "Fuente (20-F y página)", fmt())
@@ -276,7 +277,7 @@ def construir(archivo: Path, valores: dict, mercado: pd.DataFrame, balances: dic
         h.write("A6", "US$ millones", fmt(**encabezado))
         for j, a in enumerate(ANIOS):
             h.write(5, 1 + j, a, fmt(**encabezado))
-        h.write("G6", "Ayuda", fmt(**encabezado))
+        h.write(f"{AYUDA}6", "Ayuda", fmt(**encabezado))
         h.freeze_panes(6, 1)
         for i, (clave, texto, plantilla, ayuda) in enumerate(LINEAS):
             f = FILA_INICIO + i
@@ -286,7 +287,7 @@ def construir(archivo: Path, valores: dict, mercado: pd.DataFrame, balances: dic
             fuerte = dict(bold=True, top=1, top_color=LINEA) if clave in fuertes else {}
             h.write(f"A{f}", texto, fmt(**fuerte))
             if ayuda:
-                h.write(f"G{f}", ayuda, fmt(font_color=GRIS, font_size=8))
+                h.write(f"{AYUDA}{f}", ayuda, fmt(font_color=GRIS, font_size=8))
             for col, a in zip(COLUMNAS, ANIOS):
                 if plantilla is None:
                     poner(h, f"{col}{f}", balances.get((e, a, clave)), fmt(**celda))
@@ -334,12 +335,12 @@ def construir(archivo: Path, valores: dict, mercado: pd.DataFrame, balances: dic
         r.write(f"A{f}", texto, fmt())
         for k, e in enumerate(EMPRESAS):
             ini = inicio[e]
-            formula(r, f"{'BCD'[k]}{f}", f"INDEX($B${ini + 2 + i}:$F${ini + 2 + i},MATCH($B$4,$B${ini + 1}:$F${ini + 1},0))", num_format=formato, align="right")
+            formula(r, f"{'BCD'[k]}{f}", f"INDEX($B${ini + 2 + i}:${COLUMNAS[-1]}${ini + 2 + i},MATCH($B$4,$B${ini + 1}:${COLUMNAS[-1]}${ini + 1},0))", num_format=formato, align="right")
     fila_apal = 4  # Deuda neta / EBITDA dentro de RATIOS
     g_ap = wb.add_chart({"type": "line"})
     for e in EMPRESAS:
         ini = inicio[e]
-        g_ap.add_series({"name": e, "categories": f"=Ratios!$B${ini + 1}:$F${ini + 1}", "values": f"=Ratios!$B${ini + 2 + fila_apal}:$F${ini + 2 + fila_apal}",
+        g_ap.add_series({"name": e, "categories": f"=Ratios!$B${ini + 1}:${COLUMNAS[-1]}${ini + 1}", "values": f"=Ratios!$B${ini + 2 + fila_apal}:${COLUMNAS[-1]}${ini + 2 + fila_apal}",
                          "line": {"color": COLOR_EMPRESA[e], "width": 2.25}, "marker": {"type": "circle", "size": 7, "fill": {"color": COLOR_EMPRESA[e]}, "border": {"color": COLOR_EMPRESA[e]}}})
     g_ap.set_title({"name": "Deuda neta / EBITDA", "name_font": {"name": "Arial", "size": 11}})
     g_ap.set_legend({"position": "bottom", "font": {"name": "Arial", "size": 9}})
@@ -370,8 +371,8 @@ def construir(archivo: Path, valores: dict, mercado: pd.DataFrame, balances: dic
     # --- Fuentes y usos
     u = nueva_hoja("Fuentes y usos", "Fuentes y usos de fondos", "De dónde salió la plata cada año y en qué se usó. US$ millones.", "#6250D6")
     u.set_column("A:A", 38)
-    u.set_column("B:E", 11)
-    u.set_column("F:F", 60)
+    u.set_column(f"B:{COLUMNAS[-2]}", 11)
+    u.set_column(f"{COLUMNAS[-1]}:{COLUMNAS[-1]}", 60)
     filas_u = [("Flujo operativo antes de intereses", lambda e, c, a: ref(e, "cfo", c), None), ("Intereses pagados", lambda e, c, a: "-" + ref(e, "int_pag", c), None),
                ("Capex", lambda e, c, a: "-" + ref(e, "capex", c), None), ("Dividendos y recompras", lambda e, c, a: "-" + ref(e, "dividendos", c), None),
                ("Variación de deuda", lambda e, c, a: f"{ref(e, 'deuda', c)}-{ref(e, 'deuda', a)}", "Del balance: incluye efectos sin movimiento de caja"),
@@ -382,13 +383,13 @@ def construir(archivo: Path, valores: dict, mercado: pd.DataFrame, balances: dic
         u.write(f"A{ini}", e, fmt(bold=True, font_color=ENCABEZADO))
         u.write(f"A{ini + 1}", "US$ millones", fmt(**encabezado))
         for j, a in enumerate(ANIOS[1:]):
-            u.write(f"{'BCDE'[j]}{ini + 1}", a, fmt(**encabezado))
+            u.write(f"{COLUMNAS[j]}{ini + 1}", a, fmt(**encabezado))
         for i, (texto, calculo, nota) in enumerate(filas_u):
             f = ini + 2 + i
             u.write(f"A{f}", texto, fmt(**(dict(bold=True, top=1, top_color=LINEA) if i == len(filas_u) - 1 else {})))
             if nota:
-                u.write(f"F{f}", nota, fmt(font_color=GRIS, font_size=8))
-            for j, col in enumerate("BCDE"):
+                u.write(f"{COLUMNAS[-1]}{f}", nota, fmt(font_color=GRIS, font_size=8))
+            for j, col in enumerate(COLUMNAS[:-1]):
                 actual, anterior = COLUMNAS[j + 1], COLUMNAS[j]
                 cuerpo = f"{col}{ini + 8}-SUM({col}{ini + 2}:{col}{ini + 6})" if calculo is None else calculo(e, actual, anterior)
                 cargado = f"OR({ref(e, 'ventas', actual)}=0,{ref(e, 'ventas', anterior)}=0)"
@@ -499,7 +500,7 @@ def construir(archivo: Path, valores: dict, mercado: pd.DataFrame, balances: dic
             valor = creditos.iat[f - 5, j] if creditos is not None and f - 5 < len(creditos) else None
             poner(t, f"{c}{f}", valor, fmt(**ed, **({"num_format": nf} if nf else {})))
         formula(t, f"M{f}", f'IF(OR($I{f}="",$J{f}=""),"",($J{f}-$I{f})/365.25)', num_format="0.0")
-        deuda_e = "+".join(f'($A{f}="{e}")*INDEX(\'{e}\'!$B${FILAS["deuda"]}:$F${FILAS["deuda"]},MATCH($B{f},\'{e}\'!$B$6:$F$6,0))' for e in EMPRESAS)
+        deuda_e = "+".join(f'($A{f}="{e}")*INDEX(\'{e}\'!$B${FILAS["deuda"]}:${COLUMNAS[-1]}${FILAS["deuda"]},MATCH($B{f},\'{e}\'!$B$6:${COLUMNAS[-1]}$6,0))' for e in EMPRESAS)
         formula(t, f"N{f}", f'IF(OR($A{f}="",$B{f}="",$K{f}=""),"",IFERROR($K{f}/({deuda_e}),"n.d."))', font_color=VERDE, num_format=P)
 
     wb.set_properties({"title": "Análisis crediticio de empresas", "author": "Lucas Alvarez"})

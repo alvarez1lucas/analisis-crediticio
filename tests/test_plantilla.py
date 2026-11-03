@@ -64,12 +64,12 @@ def test_cuadra_y_marca_ok(calculado):
 def test_ratios_a_mano(calculado):
     v, _ = calculado
     deuda, neta = 650, 500
-    assert v[("RATIOS", bloque(indice("Deuda / EBITDA"), "F"))] == pytest.approx(deuda / 405)
-    assert v[("RATIOS", bloque(indice("Deuda neta / EBITDA"), "F"))] == pytest.approx(neta / 405)
-    assert v[("RATIOS", bloque(indice("EBITDA / intereses"), "F"))] == pytest.approx(405 / 50)
-    assert v[("RATIOS", bloque(indice("Cobertura de servicio de deuda"), "F"))] == pytest.approx(350 / (45 + 110))
-    assert v[("RATIOS", bloque(indice("Flujo libre / deuda"), "F"))] == pytest.approx((350 - 45 - 200) / 650)
-    assert v[("RATIOS", bloque(indice("Liquidez corriente"), "F"))] == pytest.approx(400 / 300)
+    assert v[("RATIOS", bloque(indice("Deuda / EBITDA"), "D"))] == pytest.approx(deuda / 405)
+    assert v[("RATIOS", bloque(indice("Deuda neta / EBITDA"), "D"))] == pytest.approx(neta / 405)
+    assert v[("RATIOS", bloque(indice("EBITDA / intereses"), "D"))] == pytest.approx(405 / 50)
+    assert v[("RATIOS", bloque(indice("Cobertura de servicio de deuda"), "D"))] == pytest.approx(350 / (45 + 110))
+    assert v[("RATIOS", bloque(indice("Flujo libre / deuda"), "D"))] == pytest.approx((350 - 45 - 200) / 650)
+    assert v[("RATIOS", bloque(indice("Liquidez corriente"), "D"))] == pytest.approx(400 / 300)
 
 
 def test_el_primer_anio_no_inventa_datos_del_anterior(calculado):
@@ -97,28 +97,28 @@ def test_emision_en_pesos_no_calcula_spread_contra_el_tesoro(calculado):
 
 def test_composicion_entra_en_el_control_y_en_los_ratios(calculado):
     v, _ = calculado
-    assert v[("RATIOS", bloque(indice("ON / deuda financiera"), "F"))] == pytest.approx(500 / 600)
-    assert v[("RATIOS", bloque(indice("Caja / vencimientos a 1 año"), "F"))] == pytest.approx(150 / 100)
-    assert v[("RATIOS", bloque(indice("Costo medio de la deuda"), "F"))] == pytest.approx(50 / 650)
+    assert v[("RATIOS", bloque(indice("ON / deuda financiera"), "D"))] == pytest.approx(500 / 600)
+    assert v[("RATIOS", bloque(indice("Caja / vencimientos a 1 año"), "D"))] == pytest.approx(150 / 100)
+    assert v[("RATIOS", bloque(indice("Costo medio de la deuda"), "D"))] == pytest.approx(50 / 650)
 
 
 def test_balance_a_fondo_a_mano(calculado):
     v, _ = calculado
-    assert v[("RATIOS", bloque(indice("Ciclo de caja (días)"), "F"))] == pytest.approx((150 / 1000 + 80 / 600 - 120 / 600) * 365)
-    assert v[("RATIOS", bloque(indice("Rotación de activos"), "F"))] == pytest.approx(1000 / 1900)
+    assert v[("RATIOS", bloque(indice("Ciclo de caja (días)"), "D"))] == pytest.approx((150 / 1000 + 80 / 600 - 120 / 600) * 365)
+    assert v[("RATIOS", bloque(indice("Rotación de activos"), "D"))] == pytest.approx(1000 / 1900)
     altman = 3.25 + 6.56 * 100 / 1900 + 3.26 * 300 / 1900 + 6.72 * 300 / 1900 + 1.05 * 900 / 1000
-    assert v[("RATIOS", bloque(indice("Altman Z'' mercados emergentes"), "F"))] == pytest.approx(altman)
-    assert v[("ESTRUCTURA", "F7")] == pytest.approx(405 / 1000)
+    assert v[("RATIOS", bloque(indice("Altman Z'' mercados emergentes"), "D"))] == pytest.approx(altman)
+    assert v[("ESTRUCTURA", "D7")] == pytest.approx(405 / 1000)
 
 
 def test_fuentes_y_usos_cierra_con_la_variacion_de_caja(calculado):
     v, _ = calculado
     h = "FUENTES Y USOS"
-    assert v[(h, "E6")] == 350
-    assert v[(h, "E7")] == -45
-    assert v[(h, "E10")] == 0
-    assert v[(h, "E12")] == 0
-    assert sum(v[(h, f"E{f}")] for f in range(6, 12)) == pytest.approx(v[(h, "E12")])
+    assert v[(h, "C6")] == 350
+    assert v[(h, "C7")] == -45
+    assert v[(h, "C10")] == 0
+    assert v[(h, "C12")] == 0
+    assert sum(v[(h, f"C{f}")] for f in range(6, 12)) == pytest.approx(v[(h, "C12")])
 
 
 def test_credito_calcula_plazo_y_peso_en_la_deuda(calculado):
@@ -131,30 +131,47 @@ def test_el_ebitda_excluye_lo_no_recurrente_pero_el_resultado_lo_conserva(tmp_pa
     vacio = tmp_path / "v.xlsx"
     p.construir(vacio, {}, MERCADO, {("Vista", 2025, clave): float(valor) for clave, valor in {**EJEMPLO, "no_rec": 50}.items()})
     v = p.calcular(vacio)
-    assert v[("VISTA", f"F{p.FILAS['ebitda']}")] == 355
-    assert v[("VISTA", f"F{p.FILAS['ebit']}")] == 300
+    assert v[("VISTA", f"D{p.FILAS['ebitda']}")] == 355
+    assert v[("VISTA", f"D{p.FILAS['ebit']}")] == 300
 
 
 def test_vista_cierra_contra_sus_estados_contables():
     wb = openpyxl.load_workbook(p.ARCHIVO, data_only=True)
     h = wb["Vista"]
-    assert [h[f"{c}{p.FILAS['estado']}"].value for c in "DEF"] == ["OK"] * 3
-    informado = {"D": (631.487, 396.955), "E": (625.390, 477.521), "F": (1250.830, 719.063)}
+    assert [h[f"{c}{p.FILAS['estado']}"].value for c in "BCD"] == ["OK"] * 3
+    informado = {"B": (631.487, 396.955), "C": (625.390, 477.521), "D": (1250.830, 719.063)}
     for col, (ebit, neto) in informado.items():
         assert h[f"{col}{p.FILAS['ebit']}"].value == pytest.approx(ebit, abs=0.002)
         assert h[f"{col}{p.FILAS['neto']}"].value == pytest.approx(neto, abs=0.002)
-    assert h[f"F{p.FILAS['ebitda']}"].value == pytest.approx(1537.455, abs=0.002)
+    assert h[f"D{p.FILAS['ebitda']}"].value == pytest.approx(1537.455, abs=0.002)
 
 
 def test_pampa_cierra_contra_su_20f():
     wb = openpyxl.load_workbook(p.ARCHIVO, data_only=True)
     h = wb["Pampa"]
-    assert [h[f"{c}{p.FILAS['estado']}"].value for c in "DEF"] == ["OK"] * 3
-    for col, (operativo, neto, ac) in {"E": (440, 619, 2380), "F": (503, 378, 1988)}.items():
+    assert [h[f"{c}{p.FILAS['estado']}"].value for c in "BCD"] == ["OK"] * 3
+    for col, (operativo, neto, ac) in {"B": (424, 305, 1335), "C": (440, 619, 2380), "D": (503, 378, 1988)}.items():
         assert h[f"{col}{p.FILAS['ebit']}"].value + h[f"{col}{p.FILAS['asociadas']}"].value == operativo
         assert h[f"{col}{p.FILAS['neto']}"].value == neto
         assert h[f"{col}{p.FILAS['ac']}"].value == ac
-    assert h[f"D{p.FILAS['ebit']}"].value + h[f"D{p.FILAS['asociadas']}"].value == 424
+
+
+def test_ypf_cierra_contra_su_20f():
+    wb = openpyxl.load_workbook(p.ARCHIVO, data_only=True)
+    h = wb["YPF"]
+    assert [h[f"{c}{p.FILAS['estado']}"].value for c in "BCD"] == ["OK"] * 3
+    for col, (operativo, neto, deuda) in {"B": (-1248, -1277, 8190), "C": (1480, 2393, 8942), "D": (1740, -799, 10581)}.items():
+        assert h[f"{col}{p.FILAS['ebit']}"].value == operativo
+        assert h[f"{col}{p.FILAS['neto']}"].value == neto
+        assert h[f"{col}{p.FILAS['deuda_cp']}"].value + h[f"{col}{p.FILAS['deuda_lp']}"].value == deuda
+
+
+def test_las_on_de_ypf_suman_su_nota_22():
+    e = pd.read_csv(p.EMISIONES, encoding="utf-8")
+    anteriores_a_2021 = 15 + 648 + 19 + 530 + 2 + 397  # 1998, LIII, LIV y Clase I: fuera del período con riesgo país
+    assert e[e.empresa == "YPF"].saldo_2025.sum() + anteriores_a_2021 == pytest.approx(8952)
+    c = pd.read_csv(p.CREDITOS, encoding="utf-8")
+    assert c[c.empresa == "YPF"].saldo.sum() == pytest.approx(10581 - 8952)
 
 
 def test_el_detalle_de_vista_suma_el_total_de_deuda():
@@ -169,7 +186,7 @@ def test_el_rescate_guarda_lo_cargado_a_mano(tmp_path, monkeypatch):
     pd.DataFrame([("Vista", 2025, "ventas", 7)], columns=["empresa", "anio", "clave", "valor"]).to_csv(balances, index=False)
     p.construir(archivo, {}, MERCADO)
     wb = openpyxl.load_workbook(archivo)
-    wb["Pampa"][f"F{p.FILAS['ventas']}"] = 123
+    wb["Pampa"][f"D{p.FILAS['ventas']}"] = 123
     wb.save(archivo)
     monkeypatch.setattr(p, "ARCHIVO", archivo)
     monkeypatch.setattr(p, "BALANCES", balances)
@@ -207,15 +224,15 @@ def test_un_descuadre_se_marca(tmp_path):
     wb = openpyxl.load_workbook(vacio)
     ws = wb["YPF"]
     for clave, valor in EJEMPLO.items():
-        ws[f"F{p.FILAS[clave]}"] = valor
-    ws[f"F{p.FILAS['patrimonio']}"] = 950
+        ws[f"D{p.FILAS[clave]}"] = valor
+    ws[f"D{p.FILAS['patrimonio']}"] = 950
     lleno = tmp_path / "l.xlsx"
     wb.save(lleno)
-    assert p.calcular(lleno)[("YPF", f"F{p.FILAS['estado']}")] == "Revisar"
+    assert p.calcular(lleno)[("YPF", f"D{p.FILAS['estado']}")] == "Revisar"
 
 
 def test_sin_cargar_no_da_errores(calculado):
     _, vacio = calculado
     assert not [k for k, x in vacio.items() if str(x).startswith("#")]
-    assert vacio[("YPF", f"F{p.FILAS['estado']}")] == "Sin cargar"
-    assert vacio[("RATIOS", bloque(indice("Deuda / EBITDA"), "F", 1))] == "n.d."
+    assert vacio[("YPF", f"D{p.FILAS['estado']}")] == "Sin cargar"
+    assert vacio[("RATIOS", bloque(indice("Deuda / EBITDA"), "D", 1))] == "n.d."
