@@ -266,3 +266,11 @@ def test_sin_cargar_no_da_errores(calculado):
     assert not [k for k, x in vacio.items() if str(x).startswith("#")]
     assert vacio[("YPF", f"D{p.FILAS['estado']}")] == "Sin cargar"
     assert vacio[("RATIOS", bloque(indice("Deuda / EBITDA"), "D", 1))] == "n.d."
+
+
+def test_el_memo_sale_del_excel_y_no_deja_huecos():
+    from empresas import memo
+    texto = memo.escribir(memo.leer())
+    assert "None" not in texto and "n.d." not in texto
+    assert "Rating interno **" in texto and "zona gris" in texto
+    assert memo.zona_altman(4.8) == "gris" and memo.zona_altman(7.6) == "segura"

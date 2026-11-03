@@ -12,7 +12,7 @@ con covenants de deuda neta / EBITDA ≤ 3,5x y EBITDA / intereses ≥ 2,0x.
 - **Cuánto:** en el escenario de estrés, Pampa podría sumar US$ 362 M de deuda sin pasar 3,0x de deuda neta / EBITDA en ningún año.
   La línea propuesta es 28% de esa capacidad.
 - **Por qué no más:** el flujo libre fue negativo los tres años (US$ -463, -157, -376 M) y la cobertura de servicio de deuda de 2025 fue
-  0,9x: Pampa paga sus vencimientos con deuda nueva, no con caja propia.
+  0,89x: Pampa paga sus vencimientos con deuda nueva, no con caja propia.
 
 ## Perfil financiero comparado (2025)
 
@@ -27,15 +27,15 @@ con covenants de deuda neta / EBITDA ≤ 3,5x y EBITDA / intereses ≥ 2,0x.
 | Costo medio de la deuda | 6,9% | 6,5% | 6,7% |
 | Altman Z'' mercados emergentes | 7,6x | 4,8x | 5,7x |
 
-Pampa es la menos rentable de las tres, pero la menos endeudada y la de mayor liquidez. Su Altman Z'' queda en zona segura, como el de las otras dos.
+Pampa es la menos rentable de las tres, pero la menos endeudada y la de mayor liquidez. El Altman Z'' de Pampa queda en zona segura; el de YPF y Vista, en zona gris.
 
 ## Financiamiento
 
 - **Depende del mercado de capitales:** 96% de su deuda son obligaciones negociables y sólo US$ 78 M son préstamos financieros.
   Toda su deuda de 2025 está en dólares y a tasa fija.
-- **Se financia mejor que el Estado:** sus tres colocaciones de 2025 rindieron entre 7,25% y 8,125%, por debajo del riesgo país del día (ver hoja Emisiones).
+- **Se financia mejor que el Estado:** sus 3 colocaciones de 2025 rindieron entre 7,25% y 8,125%, por debajo del riesgo país del día (ver hoja Emisiones).
 - **Qué le aporta el banco:** liquidez de corto plazo y prefinanciación atada a exportaciones, donde la ON no compite. Para plazos largos, la empresa elige el mercado.
-- **Precio de referencia:** su ON Clase 25 a 3 años rinde 7,25%. Una línea a la misma duración tiene que competir con esa tasa.
+- **Precio de referencia:** su ON Clase 25 se colocó a 3 años al 7,25%. Una línea de plazo parecido tiene que competir con esa tasa.
 
 ## Escenario de estrés (2026-2028)
 
@@ -44,13 +44,13 @@ capex igual a la depreciación. Peor año de cada indicador:
 
 | Empresa | Deuda neta / EBITDA | EBITDA / intereses | Cobertura de servicio | Rating interno |
 |---|---|---|---|---|
-| Pampa | 2,3x | 2,8x | 1,0x | BBB → BB |
-| YPF | 3,1x | 3,3x | 1,2x | BB → BB |
-| Vista | 3,0x | 3,4x | 0,8x | BBB → BB |
+| Pampa | 2,3x | 2,8x | 0,95x | BBB → BB |
+| YPF | 3,1x | 3,3x | 1,16x | BB → BB |
+| Vista | 3,0x | 3,4x | 0,83x | BBB → BB |
 
 - **Pampa no rompe los covenants supuestos ni bajo estrés**, y en el escenario base su EBITDA podría caer 69% antes de llegar a
   3,5x de deuda neta / EBITDA.
-- **El riesgo real es refinanciar:** bajo estrés, la cobertura de servicio de deuda baja hasta 1,0x. Si el mercado se cierra,
+- **El riesgo real es refinanciar:** bajo estrés, la cobertura de servicio de deuda baja hasta 0,95x. Si el mercado se cierra,
   la caja actual cubre aproximadamente 4,1 años de vencimientos.
 
 ## Condiciones propuestas
@@ -64,6 +64,6 @@ capex igual a la depreciación. Peor año de cada indicador:
 
 - **Riesgo soberano y de transferencia:** la empresa se financia por debajo del riesgo país, pero opera en Argentina. Este rating interno no aplica techo soberano.
 - **Concentración de vencimientos:** la proyección supone vencimientos parejos según la vida media de la deuda (7,7 años). En la práctica vencen en bloques
-  grandes, como la Clase 23 por US$ 700 M en 2034.
+  grandes, como la Clase 23 por US$ 700 M en 2034 (nota 12.5.2 del 20-F).
 - **Supuestos declarados:** los covenants, el límite interno de 3,0x y la parte del banco (30%) son supuestos, no datos de contratos.
 - **Cifras propias:** el EBITDA excluye resultados no recurrentes y asociadas, así que no coincide con el EBITDA ajustado que publica la empresa.
