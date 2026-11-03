@@ -77,7 +77,8 @@ def test_colocadores_salen_de_emisiones_existentes_y_separan_roles():
 def test_la_guia_no_deja_huecos():
     from empresas import guia, memo
     texto = guia.escribir(guia.cifras(), memo.leer())
-    assert not re.search(r"bnanb|bNoneb", texto)
+    assert not re.search(r"\bnan\b|\bNone\b", texto)
+    assert re.search(r"\bnan\b", "valor nan") and not re.search(r"\bnan\b", "financiero")  # el control detecta lo que tiene que detectar
 
 
 def test_modelo_de_instrumento():

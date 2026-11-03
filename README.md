@@ -1,6 +1,6 @@
 # Análisis crediticio de empresas
 
-¿Cuándo conviene una obligación negociable y cuándo un crédito, y qué lugar le queda al banco? Estudio de Pampa Energía, YPF y Vista sobre sus 20-F, avisos de resultados y series de mercado. El diseño está en [docs/diseno.md](docs/diseno.md) la conclusión, en el [memo de crédito](docs/memo_credito.md), y cuándo conviene cada instrumento, en la [guía de decisión](docs/guia_instrumentos.md).
+¿Cuándo conviene una obligación negociable y cuándo un crédito, y qué lugar le queda al banco? Estudio de Pampa Energía, YPF y Vista sobre sus 20-F, avisos de resultados y series de mercado. El diseño está en [docs/diseno.md](docs/diseno.md); la conclusión, en el [memo de crédito](docs/memo_credito.md), y cuándo conviene cada instrumento, en la [guía de decisión](docs/guia_instrumentos.md).
 
 **Sitio:** [alvarez1lucas.github.io/analisis-crediticio](https://alvarez1lucas.github.io/analisis-crediticio/) · **Tablero de Power BI:** [powerbi/analisis_crediticio.pbix](powerbi/analisis_crediticio.pbix) · **Modelo:** [excel/analisis_crediticio.xlsx](excel/analisis_crediticio.xlsx)
 
