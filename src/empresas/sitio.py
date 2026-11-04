@@ -328,7 +328,7 @@ def portada(L: str, base: dict) -> str:
                 "<strong>Power BI:</strong> tablero de seis páginas generado como proyecto de texto (TMDL y PBIR) desde los mismos datos.",
                 f"<strong>Controles:</strong> {base['tests']} tests; SQL, Excel y Power BI dan las mismas cifras. GitHub Actions actualiza el mercado cada lunes."])
 
-    pbix = "analisis_crediticio_en" if L == "en" else "analisis_crediticio"
+    pbix = "analisis_crediticio_en" if L == "en" and (p.ROOT / "powerbi" / "analisis_crediticio_en.pbix").exists() else "analisis_crediticio"
     descargas = [(t["memo"], "memo.html"), (t["guia"], "guia.html"), (t["excel"], f"{pref}analisis_crediticio.xlsx"),
                  (t["pbix"] + " (.pbix)", f"{REPO}/raw/main/powerbi/{pbix}.pbix"), (t["datos"], f"{REPO}/tree/main/outputs"), (t["codigo"], REPO)]
     if (p.ROOT / "powerbi" / f"{pbix}.pdf").exists():
