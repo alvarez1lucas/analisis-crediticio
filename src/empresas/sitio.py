@@ -22,7 +22,6 @@ COLOR_EMPRESA = p.COLOR_EMPRESA
 COLOR_INSTRUMENTO = {"Dólar duro": "#2A78D6", "Dólar linked": "#E34948"}
 COLOR_TIPO = {"Banco": "#2A78D6", "ALyC": "#898781", "ALyC de un banco": "#6F6E69", "Plataforma digital": "#1BAF7A", "Banco de inversión del exterior": "#EDA100"}
 GRIS = "#898781"
-PDF = {"es": "powerbi.pdf", "en": "powerbi-en.pdf"}  # tablero exportado desde Power BI, publicado en la raíz del sitio
 ESTILO = """
 :root { --fondo: #FBFBF9; --superficie: #FFFFFF; --texto: #0B0B0B; --suave: #52514E; --linea: #E1E0D9; --acento: #2A78D6; }
 @media (prefers-color-scheme: dark) { :root { --fondo: #141413; --superficie: #1C1C1B; --texto: #F2F1EC; --suave: #B5B3AC; --linea: #33322F; --acento: #6EA8EC; } }
@@ -332,7 +331,7 @@ def portada(L: str, base: dict) -> str:
     descargas = [(t["memo"], "memo.html"), (t["guia"], "guia.html"), (t["excel"], f"{pref}analisis_crediticio.xlsx"),
                  (t["pbix"] + " (.pbix)", f"{REPO}/raw/main/powerbi/{pbix}.pbix"), (t["datos"], f"{REPO}/tree/main/outputs"), (t["codigo"], REPO)]
     if (p.ROOT / "powerbi" / f"{pbix}.pdf").exists():
-        descargas.insert(3, (t["pbix"] + " (PDF)", f"{pref}{PDF[L]}"))
+        descargas.insert(3, (t["pbix"] + " (PDF)", f"{REPO}/blob/main/powerbi/{pbix}.pdf"))
     nota_modelo = es(L, f"Logistic regression on {len(e)} bonds: coefficient {n(m['coeficiente_por_1000_pb'], 2)} per 1,000 points (p = {n(m['p_valor'], 3)}). "
                         "Three companies and many same-month issues: it describes the pattern and is not a forecast.",
                      f"Regresión logística con {len(e)} ON: coeficiente {n(m['coeficiente_por_1000_pb'], 2)} por cada 1.000 puntos (p = {n(m['p_valor'], 3)}). "
@@ -423,9 +422,6 @@ def main() -> None:
         (carpeta / "memo.html").write_text(pagina(L, T[L]["memo"], documento(L, memo_md)), encoding="utf-8")
         (carpeta / "guia.html").write_text(pagina(L, T[L]["guia"], documento(L, guia_md)), encoding="utf-8")
     shutil.copy(p.ARCHIVO, SITIO / p.ARCHIVO.name)
-    for L, origen in (("es", "analisis_crediticio.pdf"), ("en", "analisis_crediticio_en.pdf")):
-        if (p.ROOT / "powerbi" / origen).exists():  # el PDF se exporta desde Power BI Desktop y se guarda en powerbi/
-            shutil.copy(p.ROOT / "powerbi" / origen, SITIO / PDF[L])
     print(f"sitio: {sorted(str(x.relative_to(SITIO)) for x in SITIO.rglob('*.*'))}")
 
 
