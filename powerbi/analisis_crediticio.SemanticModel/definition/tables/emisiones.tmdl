@@ -152,6 +152,7 @@ table emisiones
 				let
 				    Origen = Csv.Document(File.Contents(RutaDatos & "\outputs\emisiones.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
 				    Encabezados = Table.PromoteHeaders(Origen, [PromoteAllScalars = true]),
-				    Resultado = Table.TransformColumnTypes(Encabezados, {{"empresa", type text}, {"clase", type text}, {"instrumento", type text}, {"monto", type number}, {"cupon", type number}, {"rendimiento", type number}, {"fecha", type date}, {"vencimiento", type date}, {"plazo", type number}, {"tasa", type number}, {"anio", Int64.Type}, {"riesgo_pais", type number}, {"tesoro", type number}, {"credito_sistema", type number}, {"spread_pb", type number}, {"prima_riesgo_pais_pb", type number}, {"on_menos_credito_pb", type number}}, "en-US")
+				    Paso0 = Table.TransformColumnTypes(Encabezados, {{"empresa", type text}, {"clase", type text}, {"instrumento", type text}, {"monto", type number}, {"cupon", type number}, {"rendimiento", type number}, {"fecha", type date}, {"vencimiento", type date}, {"plazo", type number}, {"tasa", type number}, {"anio", Int64.Type}, {"riesgo_pais", type number}, {"tesoro", type number}, {"credito_sistema", type number}, {"spread_pb", type number}, {"prima_riesgo_pais_pb", type number}, {"on_menos_credito_pb", type number}}, "en-US"),
+				    Resultado = Paso0
 				in
 				    Resultado

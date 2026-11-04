@@ -1,0 +1,50 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "name": "bancos_04",
+  "position": {
+    "x": 646,
+    "y": 396,
+    "z": 400,
+    "height": 64,
+    "width": 610,
+    "tabOrder": 400
+  },
+  "visual": {
+    "visualType": "textbox",
+    "drillFilterOtherVisuals": true,
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Bank",
+                    "textStyle": {
+                      "fontSize": "12pt",
+                      "color": "#0b0b0b",
+                      "fontFamily": "Segoe UI Semibold"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Places without taking the risk: Balanz and Banco Galicia were in all of them. Lending in dollars earned about 4.9 points over time deposits in 2025.",
+                    "textStyle": {
+                      "fontSize": "10pt",
+                      "color": "#52514e",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

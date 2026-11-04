@@ -47,7 +47,8 @@
                 }
               },
               "queryRef": "Medidas.Riesgo país",
-              "nativeQueryRef": "Medidas_Riesgo país"
+              "nativeQueryRef": "Medidas_Riesgo país",
+              "displayName": "Riesgo país"
             }
           ]
         }

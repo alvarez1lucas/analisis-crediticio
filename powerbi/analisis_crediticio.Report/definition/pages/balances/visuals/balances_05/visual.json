@@ -47,7 +47,8 @@
                 }
               },
               "queryRef": "Medidas.Capex / ventas",
-              "nativeQueryRef": "Medidas_Capex / ventas"
+              "nativeQueryRef": "Medidas_Capex / ventas",
+              "displayName": "Capex / ventas"
             }
           ]
         },

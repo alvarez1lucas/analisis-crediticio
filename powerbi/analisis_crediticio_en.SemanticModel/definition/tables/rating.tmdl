@@ -1,0 +1,171 @@
+table rating
+	lineageTag: cc05f357-0512-5fde-bfd0-72b26b6e363e
+
+	column empresa
+		dataType: string
+		lineageTag: fbc9cf63-36b1-5aec-9218-5ea1eaa3b93a
+		summarizeBy: none
+		sourceColumn: empresa
+
+		annotation SummarizationSetBy = Automatic
+
+	column orden
+		dataType: int64
+		lineageTag: be946c34-bf7c-5a78-91e9-b2314031ada7
+		summarizeBy: none
+		sourceColumn: orden
+
+		annotation SummarizationSetBy = Automatic
+
+	column rating_2025
+		dataType: string
+		lineageTag: b93a8179-d6af-5252-afba-8f973d7f83a3
+		summarizeBy: none
+		sourceColumn: rating_2025
+
+		annotation SummarizationSetBy = Automatic
+
+	column rating_estres
+		dataType: string
+		lineageTag: 3564d29e-3ee7-5b17-be67-f264aa924978
+		summarizeBy: none
+		sourceColumn: rating_estres
+
+		annotation SummarizationSetBy = Automatic
+
+	column puntaje_2025
+		dataType: double
+		formatString: 0.00
+		lineageTag: bf6b1113-3024-564f-9ed2-2aac489cb576
+		summarizeBy: none
+		sourceColumn: puntaje_2025
+
+		annotation SummarizationSetBy = Automatic
+
+	column puntaje_estres
+		dataType: double
+		formatString: 0.00
+		lineageTag: 5ca6468c-d76b-52c9-9943-4f700d2a4779
+		summarizeBy: none
+		sourceColumn: puntaje_estres
+
+		annotation SummarizationSetBy = Automatic
+
+	column deuda_neta_ebitda
+		dataType: double
+		formatString: #,0.0x
+		lineageTag: 1f17bab4-4897-5f16-a80d-68ab7a85ccce
+		summarizeBy: none
+		sourceColumn: deuda_neta_ebitda
+
+		annotation SummarizationSetBy = Automatic
+
+	column ebitda_intereses
+		dataType: double
+		formatString: #,0.0x
+		lineageTag: 24a342aa-e242-5787-b2a5-37a28756644e
+		summarizeBy: none
+		sourceColumn: ebitda_intereses
+
+		annotation SummarizationSetBy = Automatic
+
+	column liquidez_corriente
+		dataType: double
+		formatString: #,0.0x
+		lineageTag: e511e6c8-6614-562e-93dd-e2e5689c9859
+		summarizeBy: none
+		sourceColumn: liquidez_corriente
+
+		annotation SummarizationSetBy = Automatic
+
+	column on_deuda
+		dataType: double
+		formatString: 0%
+		lineageTag: 9e46a024-a278-51bb-bc18-a12bd54f02f6
+		summarizeBy: none
+		sourceColumn: on_deuda
+
+		annotation SummarizationSetBy = Automatic
+
+	column peor_apalancamiento_estres
+		dataType: double
+		formatString: #,0.0x
+		lineageTag: ad3a124e-9aeb-5051-af00-8cc5f471de69
+		summarizeBy: none
+		sourceColumn: peor_apalancamiento_estres
+
+		annotation SummarizationSetBy = Automatic
+
+	column peor_cobertura_estres
+		dataType: double
+		formatString: #,0.0x
+		lineageTag: 0a7fb889-bb11-5087-984b-b0f20b6116b4
+		summarizeBy: none
+		sourceColumn: peor_cobertura_estres
+
+		annotation SummarizationSetBy = Automatic
+
+	column peor_servicio_estres
+		dataType: double
+		formatString: #,0.0x
+		lineageTag: 7e8e2afa-2cf0-5eb4-b4dd-9f8a82db96a8
+		summarizeBy: none
+		sourceColumn: peor_servicio_estres
+
+		annotation SummarizationSetBy = Automatic
+
+	column ebitda_puede_caer
+		dataType: double
+		formatString: 0%
+		lineageTag: c752e710-c10c-5088-80d5-b6a1484ff3c4
+		summarizeBy: none
+		sourceColumn: ebitda_puede_caer
+
+		annotation SummarizationSetBy = Automatic
+
+	column caja_2025
+		dataType: double
+		formatString: #,0
+		lineageTag: 8fef9290-eb54-59ee-b165-0ddfe2780ab4
+		summarizeBy: none
+		sourceColumn: caja_2025
+
+		annotation SummarizationSetBy = Automatic
+
+	column vence_primer_anio
+		dataType: double
+		formatString: #,0
+		lineageTag: 593d1b87-c4d3-5a86-ad2a-32d827ec1e09
+		summarizeBy: none
+		sourceColumn: vence_primer_anio
+
+		annotation SummarizationSetBy = Automatic
+
+	column caja_sobre_vencimientos
+		dataType: double
+		formatString: #,0.0x
+		lineageTag: 135affca-063e-5fa4-8561-fb9fd6b58727
+		summarizeBy: none
+		sourceColumn: caja_sobre_vencimientos
+
+		annotation SummarizationSetBy = Automatic
+
+	column anios_cubiertos
+		dataType: int64
+		formatString: 0
+		lineageTag: 85ee6cde-4ffb-518f-83bb-f27824d50805
+		summarizeBy: none
+		sourceColumn: anios_cubiertos
+
+		annotation SummarizationSetBy = Automatic
+
+	partition rating = m
+		mode: import
+		source =
+				let
+				    Origen = Csv.Document(File.Contents(RutaDatos & "\outputs\rating.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Encabezados = Table.PromoteHeaders(Origen, [PromoteAllScalars = true]),
+				    Paso0 = Table.TransformColumnTypes(Encabezados, {{"empresa", type text}, {"orden", Int64.Type}, {"rating_2025", type text}, {"rating_estres", type text}, {"puntaje_2025", type number}, {"puntaje_estres", type number}, {"deuda_neta_ebitda", type number}, {"ebitda_intereses", type number}, {"liquidez_corriente", type number}, {"on_deuda", type number}, {"peor_apalancamiento_estres", type number}, {"peor_cobertura_estres", type number}, {"peor_servicio_estres", type number}, {"ebitda_puede_caer", type number}, {"caja_2025", type number}, {"vence_primer_anio", type number}, {"caja_sobre_vencimientos", type number}, {"anios_cubiertos", Int64.Type}}, "en-US"),
+				    Resultado = Paso0
+				in
+				    Resultado

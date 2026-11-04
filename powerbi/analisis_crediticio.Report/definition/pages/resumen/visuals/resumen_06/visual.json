@@ -47,7 +47,8 @@
                 }
               },
               "queryRef": "Medidas.Flujo libre / deuda",
-              "nativeQueryRef": "Medidas_Flujo libre / deuda"
+              "nativeQueryRef": "Medidas_Flujo libre / deuda",
+              "displayName": "Flujo libre / deuda"
             }
           ]
         },

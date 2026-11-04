@@ -1,0 +1,56 @@
+table puente
+	lineageTag: 15b61b71-3501-5d90-bb92-bb503220199e
+
+	column empresa
+		dataType: string
+		lineageTag: 92eed6ec-5c90-5e59-8593-676ef42f896d
+		summarizeBy: none
+		sourceColumn: empresa
+
+		annotation SummarizationSetBy = Automatic
+
+	column anio
+		dataType: int64
+		lineageTag: 68e062fd-1b6c-5a94-8e9a-1976dda0618f
+		summarizeBy: none
+		sourceColumn: anio
+
+		annotation SummarizationSetBy = Automatic
+
+	column orden
+		dataType: int64
+		lineageTag: 3bd28c9c-ba0e-57f7-9483-9242c7c07e9f
+		summarizeBy: none
+		sourceColumn: orden
+
+		annotation SummarizationSetBy = Automatic
+
+	column concepto
+		dataType: string
+		lineageTag: 295bafcb-57a6-5764-b1fd-6c90f723a115
+		summarizeBy: none
+		sourceColumn: concepto
+		sortByColumn: orden
+
+		annotation SummarizationSetBy = Automatic
+
+	column monto
+		dataType: double
+		lineageTag: b9a8887f-7541-529a-abe8-bf90cf188c43
+		summarizeBy: none
+		sourceColumn: monto
+
+		annotation SummarizationSetBy = Automatic
+
+	partition puente = m
+		mode: import
+		source =
+				let
+				    Origen = Csv.Document(File.Contents(RutaDatos & "\outputs\puente.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Encabezados = Table.PromoteHeaders(Origen, [PromoteAllScalars = true]),
+				    Paso0 = Table.TransformColumnTypes(Encabezados, {{"empresa", type text}, {"anio", Int64.Type}, {"orden", Int64.Type}, {"concepto", type text}, {"monto", type number}}, "en-US"),
+				    Paso1 = Table.ReplaceValue(Paso0, "Impuestos y capital de trabajo", "Taxes and working capital", Replacer.ReplaceValue, {"concepto"}),
+				    Paso2 = Table.ReplaceValue(Paso1, "Intereses pagados", "Interest paid", Replacer.ReplaceValue, {"concepto"}),
+				    Resultado = Paso2
+				in
+				    Resultado

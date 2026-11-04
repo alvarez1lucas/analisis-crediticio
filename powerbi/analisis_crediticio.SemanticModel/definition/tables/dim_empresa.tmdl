@@ -24,6 +24,7 @@ table dim_empresa
 				let
 				    Origen = Csv.Document(File.Contents(RutaDatos & "\outputs\empresas.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
 				    Encabezados = Table.PromoteHeaders(Origen, [PromoteAllScalars = true]),
-				    Resultado = Table.TransformColumnTypes(Encabezados, {{"empresa", type text}, {"orden", Int64.Type}}, "en-US")
+				    Paso0 = Table.TransformColumnTypes(Encabezados, {{"empresa", type text}, {"orden", Int64.Type}}, "en-US"),
+				    Resultado = Paso0
 				in
 				    Resultado

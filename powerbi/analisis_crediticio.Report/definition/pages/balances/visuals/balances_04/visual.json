@@ -47,7 +47,8 @@
                 }
               },
               "queryRef": "Medidas.Liquidez corriente",
-              "nativeQueryRef": "Medidas_Liquidez corriente"
+              "nativeQueryRef": "Medidas_Liquidez corriente",
+              "displayName": "Liquidez corriente"
             }
           ]
         },

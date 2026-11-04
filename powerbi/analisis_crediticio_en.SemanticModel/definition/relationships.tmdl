@@ -1,0 +1,32 @@
+relationship 58847c0d-4cb2-5f41-80d5-542d23197b3c
+	fromColumn: indicadores.empresa
+	toColumn: dim_empresa.empresa
+
+relationship 29565fea-365a-5cd4-8332-fbe67e303d2f
+	fromColumn: emisiones.empresa
+	toColumn: dim_empresa.empresa
+
+relationship a2b3ae13-25f5-5f14-bb20-61cc9d4728fa
+	fromColumn: tendencias.empresa
+	toColumn: dim_empresa.empresa
+
+relationship 8220d7d0-2030-520a-9dba-6b0d4ab98bff
+	fromColumn: proyeccion.empresa
+	toColumn: dim_empresa.empresa
+
+relationship 79b1a246-bfb4-5c17-96a8-cedbfde99c77
+	fromColumn: rating.empresa
+	toColumn: dim_empresa.empresa
+
+relationship e5a4a1fe-970c-53b4-acfe-66998a313cbb
+	fromColumn: vencimientos.empresa
+	toColumn: dim_empresa.empresa
+
+relationship 5d99f58f-0d80-562d-a4d8-ff84d0ddd2d3
+	fromColumn: puente.empresa
+	toColumn: dim_empresa.empresa
+
+relationship e5f5f874-703d-5d49-883d-1c553ca91660
+	fromColumn: colocadores_emision.empresa
+	toColumn: dim_empresa.empresa
+

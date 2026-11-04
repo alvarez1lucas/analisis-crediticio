@@ -47,7 +47,8 @@
                 }
               },
               "queryRef": "Medidas.Deuda en dólares",
-              "nativeQueryRef": "Medidas_Deuda en dólares"
+              "nativeQueryRef": "Medidas_Deuda en dólares",
+              "displayName": "Deuda en dólares / deuda financiera"
             }
           ]
         },

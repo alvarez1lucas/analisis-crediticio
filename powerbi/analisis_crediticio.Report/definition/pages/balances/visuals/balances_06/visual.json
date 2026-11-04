@@ -47,7 +47,8 @@
                 }
               },
               "queryRef": "Medidas.ON / deuda",
-              "nativeQueryRef": "Medidas_ON / deuda"
+              "nativeQueryRef": "Medidas_ON / deuda",
+              "displayName": "ON / deuda financiera"
             }
           ]
         },

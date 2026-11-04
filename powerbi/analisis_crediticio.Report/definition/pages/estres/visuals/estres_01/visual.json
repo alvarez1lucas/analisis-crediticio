@@ -47,7 +47,8 @@
                 }
               },
               "queryRef": "Medidas.Proyección deuda neta / EBITDA",
-              "nativeQueryRef": "Medidas_Proyección deuda neta / EBITDA"
+              "nativeQueryRef": "Medidas_Proyección deuda neta / EBITDA",
+              "displayName": "deuda neta / EBITDA"
             }
           ]
         },

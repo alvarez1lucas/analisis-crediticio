@@ -55,6 +55,7 @@ table colocadores_entidad
 				let
 				    Origen = Csv.Document(File.Contents(RutaDatos & "\outputs\colocadores_entidad.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
 				    Encabezados = Table.PromoteHeaders(Origen, [PromoteAllScalars = true]),
-				    Resultado = Table.TransformColumnTypes(Encabezados, {{"entidad", type text}, {"tipo_entidad", type text}, {"emisiones", Int64.Type}, {"como_organizador", Int64.Type}, {"monto_emisiones", type number}, {"empresas", type text}}, "en-US")
+				    Paso0 = Table.TransformColumnTypes(Encabezados, {{"entidad", type text}, {"tipo_entidad", type text}, {"emisiones", Int64.Type}, {"como_organizador", Int64.Type}, {"monto_emisiones", type number}, {"empresas", type text}}, "en-US"),
+				    Resultado = Paso0
 				in
 				    Resultado

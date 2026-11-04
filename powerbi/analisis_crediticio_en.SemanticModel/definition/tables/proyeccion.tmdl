@@ -1,0 +1,54 @@
+table proyeccion
+	lineageTag: 9281f9fc-3331-50a1-9252-b6c4a58a1d7b
+
+	column empresa
+		dataType: string
+		lineageTag: 9e56e3a9-fb9b-5fd8-b0f4-24268150820f
+		summarizeBy: none
+		sourceColumn: empresa
+
+		annotation SummarizationSetBy = Automatic
+
+	column escenario
+		dataType: string
+		lineageTag: 43f5894d-9322-592c-bfb8-25d9787a4944
+		summarizeBy: none
+		sourceColumn: escenario
+
+		annotation SummarizationSetBy = Automatic
+
+	column anio
+		dataType: int64
+		lineageTag: d423164a-0d59-5e96-9e8e-f3ae17d25ef6
+		summarizeBy: none
+		sourceColumn: anio
+
+		annotation SummarizationSetBy = Automatic
+
+	column indicador
+		dataType: string
+		lineageTag: f1aca1ff-894d-52c2-9733-0fdfcc7d7c66
+		summarizeBy: none
+		sourceColumn: indicador
+
+		annotation SummarizationSetBy = Automatic
+
+	column valor
+		dataType: double
+		lineageTag: 677a7c07-b962-59de-9df4-a82e7d602690
+		summarizeBy: none
+		sourceColumn: valor
+
+		annotation SummarizationSetBy = Automatic
+
+	partition proyeccion = m
+		mode: import
+		source =
+				let
+				    Origen = Csv.Document(File.Contents(RutaDatos & "\outputs\proyeccion.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Encabezados = Table.PromoteHeaders(Origen, [PromoteAllScalars = true]),
+				    Paso0 = Table.TransformColumnTypes(Encabezados, {{"empresa", type text}, {"escenario", type text}, {"anio", Int64.Type}, {"indicador", type text}, {"valor", type number}}, "en-US"),
+				    Paso1 = Table.ReplaceValue(Paso0, "Estrés", "Stress", Replacer.ReplaceValue, {"escenario"}),
+				    Resultado = Paso1
+				in
+				    Resultado

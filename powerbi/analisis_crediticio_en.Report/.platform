@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "analisis_crediticio_en"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "251569e1-1de5-5bdc-b5d9-dc2521008d21"
+  }
+}

@@ -1,0 +1,53 @@
+table vencimientos
+	lineageTag: c5de7fb3-5a47-5617-a9dd-fb4ec63a586a
+
+	column empresa
+		dataType: string
+		lineageTag: c3f90d97-74ba-5ea9-a346-1bb68fb17c10
+		summarizeBy: none
+		sourceColumn: empresa
+
+		annotation SummarizationSetBy = Automatic
+
+	column anio
+		dataType: int64
+		lineageTag: a89a3c81-8422-5b31-9409-326a27641949
+		summarizeBy: none
+		sourceColumn: anio
+
+		annotation SummarizationSetBy = Automatic
+
+	column tipo
+		dataType: string
+		lineageTag: bd513268-40a1-5942-a6d2-dc11aba383c5
+		summarizeBy: none
+		sourceColumn: tipo
+
+		annotation SummarizationSetBy = Automatic
+
+	column moneda
+		dataType: string
+		lineageTag: e88659d1-2484-5be1-b446-7f78be438daa
+		summarizeBy: none
+		sourceColumn: moneda
+
+		annotation SummarizationSetBy = Automatic
+
+	column monto
+		dataType: double
+		lineageTag: 368b6fb4-3ed3-5e1d-8e66-26d7488cb504
+		summarizeBy: none
+		sourceColumn: monto
+
+		annotation SummarizationSetBy = Automatic
+
+	partition vencimientos = m
+		mode: import
+		source =
+				let
+				    Origen = Csv.Document(File.Contents(RutaDatos & "\outputs\vencimientos.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Encabezados = Table.PromoteHeaders(Origen, [PromoteAllScalars = true]),
+				    Paso0 = Table.TransformColumnTypes(Encabezados, {{"empresa", type text}, {"anio", Int64.Type}, {"tipo", type text}, {"moneda", type text}, {"monto", type number}}, "en-US"),
+				    Resultado = Paso0
+				in
+				    Resultado

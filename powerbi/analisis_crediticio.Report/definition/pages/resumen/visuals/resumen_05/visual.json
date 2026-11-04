@@ -47,7 +47,8 @@
                 }
               },
               "queryRef": "Medidas.Deuda neta / EBITDA",
-              "nativeQueryRef": "Medidas_Deuda neta / EBITDA"
+              "nativeQueryRef": "Medidas_Deuda neta / EBITDA",
+              "displayName": "Deuda neta / EBITDA"
             }
           ]
         },

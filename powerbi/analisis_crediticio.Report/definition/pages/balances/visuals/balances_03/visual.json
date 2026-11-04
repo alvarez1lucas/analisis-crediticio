@@ -47,7 +47,8 @@
                 }
               },
               "queryRef": "Medidas.EBITDA / intereses",
-              "nativeQueryRef": "Medidas_EBITDA / intereses"
+              "nativeQueryRef": "Medidas_EBITDA / intereses",
+              "displayName": "EBITDA / intereses"
             }
           ]
         },

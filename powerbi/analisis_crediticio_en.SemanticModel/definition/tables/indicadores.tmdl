@@ -1,0 +1,45 @@
+table indicadores
+	lineageTag: 1dbfa83b-ace8-53b4-9561-77410d3f234f
+
+	column empresa
+		dataType: string
+		lineageTag: f8587899-3064-542b-84cc-aa91a108d5bf
+		summarizeBy: none
+		sourceColumn: empresa
+
+		annotation SummarizationSetBy = Automatic
+
+	column anio
+		dataType: int64
+		lineageTag: 00b8bf18-cb99-5ca0-a30b-9e4841218a15
+		summarizeBy: none
+		sourceColumn: anio
+
+		annotation SummarizationSetBy = Automatic
+
+	column indicador
+		dataType: string
+		lineageTag: 6c71512f-a41a-5aee-a80e-7f6dbda3b2f3
+		summarizeBy: none
+		sourceColumn: indicador
+
+		annotation SummarizationSetBy = Automatic
+
+	column valor
+		dataType: double
+		lineageTag: 209ad44e-2c1c-51db-8dd7-bd7721edf074
+		summarizeBy: none
+		sourceColumn: valor
+
+		annotation SummarizationSetBy = Automatic
+
+	partition indicadores = m
+		mode: import
+		source =
+				let
+				    Origen = Csv.Document(File.Contents(RutaDatos & "\outputs\indicadores.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Encabezados = Table.PromoteHeaders(Origen, [PromoteAllScalars = true]),
+				    Paso0 = Table.TransformColumnTypes(Encabezados, {{"empresa", type text}, {"anio", Int64.Type}, {"indicador", type text}, {"valor", type number}}, "en-US"),
+				    Resultado = Paso0
+				in
+				    Resultado

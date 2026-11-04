@@ -1,0 +1,85 @@
+table tendencias
+	lineageTag: 92acade5-8525-5fe2-9deb-ff19f87fe41d
+
+	column empresa
+		dataType: string
+		lineageTag: 5315c9b0-02d7-5096-9b3a-0f7dd0330862
+		summarizeBy: none
+		sourceColumn: empresa
+
+		annotation SummarizationSetBy = Automatic
+
+	column anio
+		dataType: int64
+		lineageTag: 73c9b803-fb51-5c2a-a39d-df518ff044d6
+		summarizeBy: none
+		sourceColumn: anio
+
+		annotation SummarizationSetBy = Automatic
+
+	column emisiones
+		dataType: int64
+		lineageTag: 3d2288d6-b3a5-5019-86e9-e6fafcf63ce1
+		summarizeBy: none
+		sourceColumn: emisiones
+
+		annotation SummarizationSetBy = Automatic
+
+	column monto
+		dataType: double
+		lineageTag: 7746c3ab-772a-5f91-8c43-ba0295bbf879
+		summarizeBy: none
+		sourceColumn: monto
+
+		annotation SummarizationSetBy = Automatic
+
+	column parte_dolar_linked
+		dataType: double
+		lineageTag: 31e4d377-ec2e-55c1-816a-734fca678a70
+		summarizeBy: none
+		sourceColumn: parte_dolar_linked
+
+		annotation SummarizationSetBy = Automatic
+
+	column plazo_medio
+		dataType: double
+		lineageTag: becd82f0-dff3-595a-98c8-58cd541b6094
+		summarizeBy: none
+		sourceColumn: plazo_medio
+
+		annotation SummarizationSetBy = Automatic
+
+	column tasa_media
+		dataType: double
+		lineageTag: fff0370d-7f16-51cf-9aeb-bd84726c5269
+		summarizeBy: none
+		sourceColumn: tasa_media
+
+		annotation SummarizationSetBy = Automatic
+
+	column tasa_media_dolar_duro
+		dataType: double
+		lineageTag: cbb15207-3e73-50d8-b3c9-0f8dd8b6e268
+		summarizeBy: none
+		sourceColumn: tasa_media_dolar_duro
+
+		annotation SummarizationSetBy = Automatic
+
+	column riesgo_pais_medio
+		dataType: double
+		lineageTag: 65d944ec-9b24-5945-ba6a-fa69c4884da1
+		summarizeBy: none
+		sourceColumn: riesgo_pais_medio
+
+		annotation SummarizationSetBy = Automatic
+
+	partition tendencias = m
+		mode: import
+		source =
+				let
+				    Origen = Csv.Document(File.Contents(RutaDatos & "\outputs\tendencias.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Encabezados = Table.PromoteHeaders(Origen, [PromoteAllScalars = true]),
+				    Paso0 = Table.TransformColumnTypes(Encabezados, {{"empresa", type text}, {"anio", Int64.Type}, {"emisiones", Int64.Type}, {"monto", type number}, {"parte_dolar_linked", type number}, {"plazo_medio", type number}, {"tasa_media", type number}, {"tasa_media_dolar_duro", type number}, {"riesgo_pais_medio", type number}}, "en-US"),
+				    Resultado = Paso0
+				in
+				    Resultado

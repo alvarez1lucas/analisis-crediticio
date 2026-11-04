@@ -1,0 +1,303 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "name": "estres_03",
+  "position": {
+    "x": 24,
+    "y": 396,
+    "z": 300,
+    "height": 290,
+    "width": 1232,
+    "tabOrder": 300
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "drillFilterOtherVisuals": true,
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "rating"
+                    }
+                  },
+                  "Property": "empresa"
+                }
+              },
+              "queryRef": "rating.empresa",
+              "nativeQueryRef": "rating_empresa",
+              "displayName": "Company"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "rating"
+                    }
+                  },
+                  "Property": "peor_apalancamiento_estres"
+                }
+              },
+              "queryRef": "rating.peor_apalancamiento_estres",
+              "nativeQueryRef": "rating_peor_apalancamiento_estres",
+              "displayName": "Worst net debt / EBITDA"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "rating"
+                    }
+                  },
+                  "Property": "peor_cobertura_estres"
+                }
+              },
+              "queryRef": "rating.peor_cobertura_estres",
+              "nativeQueryRef": "rating_peor_cobertura_estres",
+              "displayName": "Worst EBITDA / interest"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "rating"
+                    }
+                  },
+                  "Property": "peor_servicio_estres"
+                }
+              },
+              "queryRef": "rating.peor_servicio_estres",
+              "nativeQueryRef": "rating_peor_servicio_estres",
+              "displayName": "Worst debt service coverage"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "rating"
+                    }
+                  },
+                  "Property": "ebitda_puede_caer"
+                }
+              },
+              "queryRef": "rating.ebitda_puede_caer",
+              "nativeQueryRef": "rating_ebitda_puede_caer",
+              "displayName": "EBITDA headroom (base)"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "rating"
+                    }
+                  },
+                  "Property": "rating_estres"
+                }
+              },
+              "queryRef": "rating.rating_estres",
+              "nativeQueryRef": "rating_rating_estres",
+              "displayName": "Rating under stress"
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "total": [
+        {
+          "properties": {
+            "totals": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "columnHeaders": [
+        {
+          "properties": {
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "13.0D"
+                }
+              }
+            },
+            "wordWrap": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "values": [
+        {
+          "properties": {
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "13.0D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "grid": [
+        {
+          "properties": {
+            "rowPadding": {
+              "expr": {
+                "Literal": {
+                  "Value": "8L"
+                }
+              }
+            },
+            "textSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "13.0D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "columnWidth": [
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "198.0D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "rating.empresa"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "198.0D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "rating.peor_apalancamiento_estres"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "198.0D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "rating.peor_cobertura_estres"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "198.0D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "rating.peor_servicio_estres"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "198.0D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "rating.ebitda_puede_caer"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "198.0D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "rating.rating_estres"
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Worst year of the stress scenario, by company'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

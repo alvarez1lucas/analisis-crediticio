@@ -47,7 +47,8 @@
                 }
               },
               "queryRef": "Medidas.Proyección cobertura de servicio",
-              "nativeQueryRef": "Medidas_Proyección cobertura de servicio"
+              "nativeQueryRef": "Medidas_Proyección cobertura de servicio",
+              "displayName": "cobertura de servicio de deuda"
             }
           ]
         },

@@ -47,7 +47,8 @@
                 }
               },
               "queryRef": "Medidas.Margen EBITDA",
-              "nativeQueryRef": "Medidas_Margen EBITDA"
+              "nativeQueryRef": "Medidas_Margen EBITDA",
+              "displayName": "Margen EBITDA"
             }
           ]
         },
