@@ -6,14 +6,14 @@ Pampa,2028,Préstamo,Dólar,46.0
 Pampa,2031,ON,Dólar,412.0
 Pampa,2034,ON,Dólar,693.0
 Pampa,2037,ON,Dólar,437.0
-Vista,2026,ON,Dólar linked,143.215
 Vista,2026,ON,Dólar,14.726
-Vista,2026,Préstamo,Dólar,119.04499999999999
+Vista,2026,ON,Dólar linked,143.215
 Vista,2026,Préstamo,Dólar linked,45.268
-Vista,2027,ON,Dólar linked,118.319
+Vista,2026,Préstamo,Dólar,119.04499999999999
 Vista,2027,ON,Dólar,147.25900000000001
-Vista,2027,Préstamo,Dólar,0.028
+Vista,2027,ON,Dólar linked,118.319
 Vista,2027,Préstamo,Dólar linked,50.18
+Vista,2027,Préstamo,Dólar,0.028
 Vista,2028,ON,Dólar linked,139.57
 Vista,2029,ON,Dólar,46.942
 Vista,2030,ON,Dólar,94.038
@@ -22,11 +22,11 @@ Vista,2031,ON,Dólar linked,87.233
 Vista,2031,ON,Dólar,151.747
 Vista,2033,ON,Dólar,899.341
 Vista,2035,ON,Dólar,597.954
-YPF,2026,ON,Dólar linked,722.0
 YPF,2026,ON,Dólar,764.0
+YPF,2026,ON,Dólar linked,722.0
 YPF,2026,Prefinanciación,Dólar,197.0
-YPF,2026,Préstamo,Pesos,27.0
 YPF,2026,Préstamo,Dólar,645.0
+YPF,2026,Préstamo,Pesos,27.0
 YPF,2027,ON,Dólar,1467.0
 YPF,2027,ON,Dólar linked,38.0
 YPF,2027,Prefinanciación,Dólar,76.5
